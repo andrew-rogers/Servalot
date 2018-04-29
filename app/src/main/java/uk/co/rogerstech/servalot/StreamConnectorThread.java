@@ -19,20 +19,38 @@
 
 package uk.co.rogerstech.servalot;
 
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-public class MainActivity extends AppCompatActivity {
+public class StreamConnectorThread extends Thread{
+
+    private InputStream is;
+    private OutputStream os;
+
+    StreamConnectorThread(InputStream is, OutputStream os){
+        this.is=is;
+        this.os=os;
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Log.i("MainActivity","onCreate()");
+    public void run() {
+        byte buffer[] = new byte[16*1024];
+        int nread;
 
-        // Start a demo service for now
-        Service simpleHttpd = new Service("sh /sdcard/Download/httpd.sh",8081);
-        simpleHttpd.start();
+        try {
+
+            // Keep reading input until closed (or error).
+            while ((nread = is.read(buffer)) >= 0) {
+                os.write(buffer, 0 ,nread);
+            }
+
+            // Input stream closed so close output.
+            os.close();
+
+        } catch(IOException e){
+            e.printStackTrace();
+        }
     }
+
 }
