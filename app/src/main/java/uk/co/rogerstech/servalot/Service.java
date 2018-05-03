@@ -28,7 +28,7 @@ public class Service extends Thread{
     private int port;
     private String cmd;
 
-    Service(String cmd, int port){
+    Service(String name, String cmd, String address, int port){
         this.cmd=cmd;
         this.port = port;
     }
@@ -66,6 +66,10 @@ public class Service extends Thread{
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+    }
+
+    public void cleanUp(){
 
     }
 }

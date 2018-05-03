@@ -28,7 +28,7 @@ import android.widget.TextView;
 public class ServiceRecyclerViewAdapter extends RecyclerView.Adapter<ServiceRecyclerViewAdapter.ViewHolder>{
 
     private ItemClickListener clickListener;
-    private String[] serviceList;
+    private ServiceManager services;
 
     // ViewHolder class
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -52,8 +52,8 @@ public class ServiceRecyclerViewAdapter extends RecyclerView.Adapter<ServiceRecy
     }
 
     // Constructor
-    public ServiceRecyclerViewAdapter(String[] serviceList) {
-        this.serviceList = serviceList;
+    public ServiceRecyclerViewAdapter(ServiceManager services) {
+        this.services = services;
     }
 
     // Register the listener
@@ -73,13 +73,14 @@ public class ServiceRecyclerViewAdapter extends RecyclerView.Adapter<ServiceRecy
     // Configure elements of view with service details
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.tvName.setText(serviceList[position]);
+        Service service = services.get(position);
+        holder.tvName.setText(service.getName());
     }
 
     // Return the number of services
     @Override
     public int getItemCount() {
-        return serviceList.length;
+        return services.size();
     }
 
 
