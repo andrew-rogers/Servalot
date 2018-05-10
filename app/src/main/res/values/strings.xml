@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Servalot</string>
+    <string-array name="service_types">
+        <item>sh script</item>
+        <item>binary</item>
+        <item>HC-05</item>
+    </string-array>
 </resources>

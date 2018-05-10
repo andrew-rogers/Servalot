@@ -19,15 +19,21 @@
 
 package uk.co.rogerstech.servalot;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.File;
@@ -37,7 +43,6 @@ import java.io.InputStream;
 public class MainActivity extends AppCompatActivity implements ServiceRecyclerViewAdapter.ItemClickListener{
 
     private ServiceRecyclerViewAdapter rvaServices;
-    private String[] serviceList;
     private ServiceManager serviceManager;
     private PackageManager packageManager;
     private static final int GOT_CONTENT = 1;
@@ -47,17 +52,12 @@ public class MainActivity extends AppCompatActivity implements ServiceRecyclerVi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final Button buttonInstall = findViewById(R.id.buttonInstall);
+        final EditText etName = findViewById(R.id.editName);
         Log.i("MainActivity","onCreate()");
 
         // Start a demo service for now
         Service simpleHttpd = new Service("httpd","sh /sdcard/Download/httpd.sh", "localhost", 8081);
         simpleHttpd.start();
-
-        serviceList = new String[4];
-        serviceList[0]="httpd";
-        serviceList[1]="telnetd";
-        serviceList[2]="tftpd";
-        serviceList[3]="bootp";
 
         // Start service manager
         serviceManager = new ServiceManager(new File(getFilesDir().getPath(),"services.tsv"));
@@ -81,11 +81,25 @@ public class MainActivity extends AppCompatActivity implements ServiceRecyclerVi
                 startActivityForResult(intent, GOT_CONTENT);
             }
         });
+
+        etName.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                // If the event is a key-down event on the "enter" button
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                    (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                  // Perform action on key press
+                  editService(etName.getText().toString());
+                  return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
     public void onItemClick(View view, int position) {
-        Toast.makeText(this, "Service: " + serviceList[position], Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Service: " + serviceManager.get(position).getName(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -109,6 +123,27 @@ public class MainActivity extends AppCompatActivity implements ServiceRecyclerVi
 
         }
     }
+    public void editService(String name)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
 
+        builder.setView(inflater.inflate(R.layout.configure_service, null));
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                // TODO: save the settings
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                // Do nothing.
+            }
+        });
+
+        Dialog dialog = builder.create();
+        dialog.show();
+    }
 
 }
