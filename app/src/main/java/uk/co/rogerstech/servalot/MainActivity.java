@@ -40,7 +40,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-public class MainActivity extends AppCompatActivity implements ServiceRecyclerViewAdapter.ItemClickListener{
+public class MainActivity extends AppCompatActivity implements ServiceRecyclerViewAdapter.ItemListener{
 
     private ServiceRecyclerViewAdapter rvaServices;
     private ServiceManager serviceManager;
@@ -55,19 +55,15 @@ public class MainActivity extends AppCompatActivity implements ServiceRecyclerVi
         final EditText etName = findViewById(R.id.editName);
         Log.i("MainActivity","onCreate()");
 
-        // Start a demo service for now
-        Service simpleHttpd = new Service("httpd","sh /sdcard/Download/httpd.sh", "localhost", 8081);
-        simpleHttpd.start();
-
         // Start service manager
-        serviceManager = new ServiceManager(new File(getFilesDir().getPath(),"services.tsv"));
+        serviceManager = new ServiceManager(new File(getFilesDir(),"services.tsv"));
         serviceManager.startAll();
 
         // Services view
         RecyclerView rvServices = findViewById(R.id.rvServices);
         rvServices.setLayoutManager(new LinearLayoutManager(this));
         rvaServices = new ServiceRecyclerViewAdapter(serviceManager);
-        rvaServices.setClickListener(this);
+        rvaServices.setListener(this);
         rvServices.setAdapter(rvaServices);
 
         packageManager = new PackageManager(getFilesDir());
@@ -95,11 +91,22 @@ public class MainActivity extends AppCompatActivity implements ServiceRecyclerVi
                 return false;
             }
         });
+
     }
 
     @Override
-    public void onItemClick(View view, int position) {
-        Toast.makeText(this, "Service: " + serviceManager.get(position).getName(), Toast.LENGTH_SHORT).show();
+    public void onClick(Service service) {
+        Toast.makeText(this, "Service: " + service.getServiceName(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onEdit(Service service) {
+        Toast.makeText(this, "Service ed: " + service.getServiceName(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onDelete(Service service) {
+        Toast.makeText(this, "Service delete: " + service.getServiceName(), Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -25,11 +25,15 @@ import java.net.Socket;
 
 public class Service extends Thread{
 
-    private int port;
+    private String name;
     private String cmd;
+    private String address;
+    private int port;
 
     Service(String name, String cmd, String address, int port){
+        this.name=name;
         this.cmd=cmd;
+        this.address=address;
         this.port = port;
     }
 
@@ -67,6 +71,18 @@ public class Service extends Thread{
             e.printStackTrace();
         }
 
+    }
+
+    public String getServiceName(){
+        return name;
+    }
+
+    public String getCommand(){
+        return cmd;
+    }
+
+    public int getPort(){
+        return port;
     }
 
     public void cleanUp(){

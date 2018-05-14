@@ -31,9 +31,11 @@ public class ServiceManager {
 
     private Vector<Service> vecServices;
     private File file;
+    private File serviceDir;
 
     ServiceManager(File file){
         this.file=file;
+        serviceDir=new File(file.getParentFile(),"services");
         vecServices = new Vector<Service>();
         load();
     }
@@ -68,9 +70,15 @@ public class ServiceManager {
         while(tokenizer.hasMoreElements()){
             vec.add(tokenizer.nextElement().toString());
         }
-        if(vec.size()>=4){
-            Service service = new Service(vec.get(0),vec.get(1),vec.get(2),Integer.parseInt(vec.get(3)));
-            vecServices.add(service);
+        if(vec.size()>=5){
+            String type = vec.get(1);
+            if(type.equals("sh")) {
+                File exec = new File(serviceDir, vec.get(2));
+                String cmd = "sh " + exec.getPath();
+                Service service = new Service(vec.get(0), cmd, vec.get(3), Integer.parseInt(vec.get(4)));
+                vecServices.add(service);
+            }
+            // TODO: Support HC-05
         }
     }
 
