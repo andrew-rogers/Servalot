@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements ServiceRecyclerVi
         Log.i("MainActivity","onCreate()");
 
         // Start service manager
-        serviceManager = new ServiceManager(new File(getFilesDir(),"services.tsv"));
+        serviceManager = new ServiceManager(getFilesDir(), new File(getFilesDir(),"services.tsv"));
         serviceManager.startAll();
 
         // Services view

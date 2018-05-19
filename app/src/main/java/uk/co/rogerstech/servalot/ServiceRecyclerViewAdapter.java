@@ -28,6 +28,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.io.File;
+import java.util.List;
 
 public class ServiceRecyclerViewAdapter extends RecyclerView.Adapter<ServiceRecyclerViewAdapter.ViewHolder>{
 
@@ -54,9 +55,16 @@ public class ServiceRecyclerViewAdapter extends RecyclerView.Adapter<ServiceRecy
         void setService(Service service) {
             this.service = service;
             tvName.setText(service.getServiceName());
-            File exec=new File(service.getCommand());
-            tvExecutable.setText(exec.getName());
-            tvPort.setText(""+service.getPort());
+            List<String> list_cmd = service.getCommand();
+            String cmd="";
+            if(list_cmd.size() > 0) {
+                cmd=list_cmd.get(list_cmd.size()-1);
+                File file=new File(cmd);
+                cmd=file.getName();
+            }
+            tvExecutable.setText(cmd);
+            String port=""+ service.getPort();
+            tvPort.setText(port);
         }
 
         @Override

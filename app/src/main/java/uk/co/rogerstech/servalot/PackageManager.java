@@ -27,6 +27,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -43,7 +46,10 @@ public class PackageManager {
         unzip(in, root);
         File postinst=new File(root.getPath(),"POSTINST.sh");
         if(postinst.exists()) {
-            ret = runCommand("sh " + postinst.getPath());
+            Vector<String> cmd = new Vector<String>();
+            cmd.add("sh");
+            cmd.add(postinst.getPath());
+            ret = runCommand(cmd);
         }
         return ret;
     }
@@ -98,11 +104,17 @@ public class PackageManager {
         return 0;
     }
 
-    public String runCommand(String cmd) {
+    public String runCommand(List<String> cmd) {
         StringBuffer output = new StringBuffer();
         try {
             // Execute the command.
-            Process process = Runtime.getRuntime().exec(cmd);
+            ProcessBuilder processBuilder = new ProcessBuilder(cmd);
+            Map<String, String> env = processBuilder.environment();
+            String path=env.get("PATH");
+            path=root.getPath()+"/bin:"+path;
+            env.put("PATH", path);
+            processBuilder.directory(root);
+            Process process = processBuilder.start();
 
             // Read stdout.
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));

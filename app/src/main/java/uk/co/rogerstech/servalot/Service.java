@@ -19,19 +19,24 @@
 
 package uk.co.rogerstech.servalot;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
+import java.util.Map;
 
 public class Service extends Thread{
 
     private String name;
-    private String cmd;
+    private File root_dir;
+    private List<String> cmd;
     private String address;
     private int port;
 
-    Service(String name, String cmd, String address, int port){
+    Service(String name, File root_dir, List<String> cmd, String address, int port){
         this.name=name;
+        this.root_dir=root_dir;
         this.cmd=cmd;
         this.address=address;
         this.port = port;
@@ -41,6 +46,7 @@ public class Service extends Thread{
     public void run() {
         Socket socket = null;
         Process process = null;
+        ProcessBuilder processBuilder = null;
         StreamConnectorThread stdout=null;
 
         try {
@@ -52,7 +58,13 @@ public class Service extends Thread{
                 socket = httpServerSocket.accept();
 
                 // Start the service process
-                process = Runtime.getRuntime().exec(cmd);
+                processBuilder = new ProcessBuilder(cmd);
+                Map<String, String> env = processBuilder.environment();
+                String path=env.get("PATH");
+                path=root_dir.getPath()+"/bin:"+path;
+                env.put("PATH", path);
+                processBuilder.directory(root_dir);
+                process = processBuilder.start();
 
                 // Start process stdout to socket thread
                 stdout = new StreamConnectorThread(process.getInputStream(), socket.getOutputStream());
@@ -77,7 +89,7 @@ public class Service extends Thread{
         return name;
     }
 
-    public String getCommand(){
+    public List<String> getCommand(){
         return cmd;
     }
 

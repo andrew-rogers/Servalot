@@ -30,10 +30,12 @@ import java.util.Vector;
 public class ServiceManager {
 
     private Vector<Service> vecServices;
+    private File root_dir;
     private File file;
     private File serviceDir;
 
-    ServiceManager(File file){
+    ServiceManager(File root_dir, File file){
+        this.root_dir=root_dir;
         this.file=file;
         serviceDir=new File(file.getParentFile(),"services");
         vecServices = new Vector<Service>();
@@ -74,8 +76,10 @@ public class ServiceManager {
             String type = vec.get(1);
             if(type.equals("sh")) {
                 File exec = new File(serviceDir, vec.get(2));
-                String cmd = "sh " + exec.getPath();
-                Service service = new Service(vec.get(0), cmd, vec.get(3), Integer.parseInt(vec.get(4)));
+                Vector<String> cmd = new Vector<String>();
+                cmd.add("sh");
+                cmd.add(exec.getPath());
+                Service service = new Service(vec.get(0), root_dir, cmd, vec.get(3), Integer.parseInt(vec.get(4)));
                 vecServices.add(service);
             }
             // TODO: Support HC-05
