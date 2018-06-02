@@ -1,0 +1,10 @@
+#!/bin/sh
+
+FN="$1"
+SB="#!$(which sh)"
+SBF=$(head -n1 "$FN")
+if [ "$SBF" != "$SB" ];then
+  sed -i "1s|#!.*|$SB|" "$FN"
+  chmod +x "$FN"
+fi
+

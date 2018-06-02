@@ -1,0 +1,3 @@
+httpd local	sh	httpd.sh	0.0.0.0	8082
+httpd sdcard	sh	httpd_sdcard.sh	0.0.0.0	8081
+
