@@ -70,10 +70,6 @@ public class Service extends Thread{
                 stdout = new StreamConnectorThread(process.getInputStream(), socket.getOutputStream());
                 stdout.start();
 
-                // Start process stderr to socket thread
-                StreamConnectorThread stderr = new StreamConnectorThread(process.getErrorStream(), socket.getOutputStream());
-                stderr.start();
-
                 // Start socket to process stdin thread.
                 StreamConnectorThread stdin = new StreamConnectorThread(socket.getInputStream(), process.getOutputStream());
                 stdin.start();

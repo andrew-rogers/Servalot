@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements ServiceRecyclerVi
         setContentView(R.layout.activity_main);
         final Button buttonInstall = findViewById(R.id.buttonInstall);
         final EditText etName = findViewById(R.id.editName);
+
         Log.i("MainActivity","onCreate()");
 
         // Start service manager
@@ -91,6 +92,9 @@ public class MainActivity extends AppCompatActivity implements ServiceRecyclerVi
                 return false;
             }
         });
+
+        Intent i= new Intent(getBaseContext(), BackgroundService.class);
+        startService(i);
 
     }
 
