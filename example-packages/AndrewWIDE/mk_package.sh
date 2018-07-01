@@ -8,6 +8,7 @@ cd "$PREVDIR"
 mkdir -p www/cgi-bin
 cd www
 ln -s "$AWDIR/www/aw-sh.js"
+ln -s "$AWDIR/www/cmd.html"
 ln -s "$AWDIR/www/edit.css"
 ln -s "$AWDIR/www/edit.js"
 ln -s "$AWDIR/www/edit.html"
@@ -20,7 +21,14 @@ cd cgi-bin
 ln -s "$AWDIR/www/cgi-bin/aw.sh"
 
 cd "$PREVDIR"
-zip AndrewWIDE.zip -r www POSTINST.sh
+mkdir -p bin
+cd bin
+ln -s "$AWDIR/bin/brun"
+ln -s "$AWDIR/bin/slow.sh"
+
+cd "$PREVDIR"
+zip AndrewWIDE.zip -r www bin POSTINST.sh
 rm -rf www
+rm -rf bin
 
 
