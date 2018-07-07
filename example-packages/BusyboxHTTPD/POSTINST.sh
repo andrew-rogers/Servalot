@@ -1,9 +1,14 @@
 # No shebang required
 
 # Assumes Servalot has set the working directory to the files directory of the app.
-export FILES_DIR="$PWD"
-export BB="busybox-armv7l"
+FILES_DIR="$PWD"
+BB="busybox-armv7l"
+
+# Rename to busybox
 chmod 755 "bin/$BB"
+"./bin/$BB" mv "bin/$BB" "bin/busybox"
+BB="busybox"
+
 chmod 755 "bin/wget-armeabi"
 
 busybox_symlinks() {
@@ -15,6 +20,10 @@ busybox_symlinks() {
       ./$BB ln -s $BB $app
     fi
   done
+
+  # Remove the wget link, busybox wget doesn't work on Android.
+  rm -f wget
+
   cd "$pdir"
 }
 
@@ -29,8 +38,6 @@ mkshexec www/cgi-bin/cmd.sh
 mkshexec www/cgi-bin/cmd1.sh
 
 # Setup the wget link
-cd bin
-rm -f wget
-ln -s wget-armeabi wget
-cd ..
+(cd bin && ln -s wget-armeabi wget)
+
 
