@@ -4,6 +4,7 @@
 
 # Make the scripts executable
 mkshexec bin/aoa-bootstrap.sh
+mkshexec bin/make
 
 # Download the AoA setup scripts
 aoa-bootstrap.sh

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# Get the ArchOnAndroid settings
+. /data/data/uk.co.rogerstech.servalot/files/ArchOnAndroid/etc/aoa-settings.sh
+
+# Call the ArchOnAndroid make
+make-bin SHELL=/data/data/uk.co.rogerstech.servalot/files/bin/sh $@
+
