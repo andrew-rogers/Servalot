@@ -1,0 +1,36 @@
+@startuml
+hide footbox
+
+box "Browser or WebView GUI" #LightBlue
+  participant "GUI in HTML/JavaScript" as gui
+  participant JsonQuery
+end box
+
+box "Servalot configuration back-end" #FAA
+  participant HTTPD
+  participant "JSON Command Handler" as handler
+end box
+
+opt Android Webview
+  handler -> JsonQuery: registerCommandHandler()
+  note left: If handler is registered\nJsonQuery knows it's in\nAndroid Webview context.
+end
+
+gui -> JsonQuery: registerResponseCallback(responseHandler)
+gui -> JsonQuery: query(Obj)
+JsonQuery -> JsonQuery: JSON.stringify(Obj)
+
+alt Android WebView
+  JsonQuery -> handler: command(Json)
+  handler -> JsonQuery: response(Json)
+else Browser and simple HTTPD
+  JsonQuery -> JsonQuery: create XHR
+  JsonQuery -> HTTPD : POST Json
+  HTTPD -> handler: command(Json)
+  handler -> HTTPD: response(Json)
+  HTTPD -> JsonQuery: OK Json
+end
+
+JsonQuery -> JsonQuery: JSON.parse(Json)
+JsonQuery -> gui: responseHandler(Obj)
+@enduml
