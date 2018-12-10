@@ -11,8 +11,13 @@ box "Servalot configuration back-end" #FAA
   participant "JSON Command Handler" as handler
 end box
 
+opt Remote Config Enabled
+  MainActivity -> HTTPD: registerCommandHandler()
+  note left: If handler is registered\nHTTPD starts up to\n allow remote config.
+end
+
 opt Android Webview
-  handler -> JsonQuery: registerCommandHandler()
+  MainActivity -> JsonQuery: registerCommandHandler()
   note left: If handler is registered\nJsonQuery knows it's in\nAndroid Webview context.
 end
 
