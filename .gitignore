@@ -8,3 +8,8 @@
 /build
 /captures
 .externalNativeBuild
+example-packages/AndrewWIDE/AndrewWIDE.zip
+example-packages/ArchOnAndroid/ArchOnAndroid.zip
+example-packages/BusyboxHTTPD/BusyboxHTTPD.zip
+app/src/main/java/uk/co/rogerstech/servalot/*.class
+
