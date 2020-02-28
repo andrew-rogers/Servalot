@@ -27,7 +27,7 @@
     tools:layout_editor_absoluteY="81dp">
 
     <WebView
-        android:id="@+id/wvConfig"
+        android:id="@+id/webview"
         android:layout_width="368dp"
         android:layout_height="200dp"
         tools:layout_editor_absoluteX="180dp"
@@ -51,7 +51,7 @@
         app:layout_constraintBottom_toTopOf="@+id/buttonInstall"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/wvConfig" />
+        app:layout_constraintTop_toBottomOf="@+id/webview" />
 
     <Button
         android:id="@+id/buttonInstall"

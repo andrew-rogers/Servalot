@@ -8,8 +8,12 @@ import android.os.IBinder;
 import android.util.Log;
 import android.support.v4.app.NotificationCompat;
 
+import java.io.File;
+
 public class BackgroundService extends Service {
     private static final int RUNNING_NOTIFICATION = 1;
+    private final IBinder binder = new LocalBinder();
+    private ServiceManager serviceManager;
 
     public BackgroundService() {
     }
@@ -28,12 +32,17 @@ public class BackgroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("LocalService", "Received start id " + startId + ": " + intent);
+
+        // Start service manager
+        serviceManager = new ServiceManager(getFilesDir(), new File(getFilesDir(),"services.tsv"));
+        serviceManager.startAll();
+
         return START_STICKY;
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return binder;
     }
 
     private void showNotification() {

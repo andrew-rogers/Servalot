@@ -1,6 +1,6 @@
 /*
     Servalot - An inetd like multi-server
-    Copyright (C) 2018  Andrew Rogers
+    Copyright (C) 2018, 2020  Andrew Rogers
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 package uk.co.rogerstech.servalot;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -28,6 +29,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -35,6 +37,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -42,8 +47,8 @@ import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity implements ServiceRecyclerViewAdapter.ItemListener{
 
-    private ServiceRecyclerViewAdapter rvaServices;
-    private ServiceManager serviceManager;
+    //private ServiceRecyclerViewAdapter rvaServices;
+    //private ServiceManager serviceManager;
     private PackageManager packageManager;
     private static final int GOT_CONTENT = 1;
 
@@ -53,19 +58,12 @@ public class MainActivity extends AppCompatActivity implements ServiceRecyclerVi
         setContentView(R.layout.activity_main);
         final Button buttonInstall = findViewById(R.id.buttonInstall);
         final EditText etName = findViewById(R.id.editName);
+        final WebView webView = (WebView) findViewById(R.id.webview);
+
 
         Log.i("MainActivity","onCreate()");
 
-        // Start service manager
-        serviceManager = new ServiceManager(getFilesDir(), new File(getFilesDir(),"services.tsv"));
-        serviceManager.startAll();
-
-        // Services view
-        RecyclerView rvServices = findViewById(R.id.rvServices);
-        rvServices.setLayoutManager(new LinearLayoutManager(this));
-        rvaServices = new ServiceRecyclerViewAdapter(serviceManager);
-        rvaServices.setListener(this);
-        rvServices.setAdapter(rvaServices);
+        initWebView(webView);
 
         packageManager = new PackageManager(getFilesDir());
 
@@ -156,5 +154,56 @@ public class MainActivity extends AppCompatActivity implements ServiceRecyclerVi
         Dialog dialog = builder.create();
         dialog.show();
     }
+
+    public void initWebView(WebView wv)
+    {
+        WebSettings settings = wv.getSettings();
+        settings.setJavaScriptEnabled(true);
+
+
+        wv.addJavascriptInterface(new WebViewInterface(), "CommandHandler");
+
+        String html = "<html><body>\n"
+                    + "<input type=\"button\" value=\"Install package...\" onClick=\"command('install')\" />\n"
+                    + "<input type=\"button\" value=\"Thing\" onClick=\"command('thing')\" />\n"
+                    + "<script type=\"text/javascript\">\n"
+                    + "function command(cmd) {\n"
+                    + "    CommandHandler.command(cmd);\n"
+                    + "}\n"
+                    + "</script>\n"
+                    + "</body></html>\n";
+
+        wv.loadData(html, "text/html", null);
+    }
+
+    public void install()
+    {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.setType("application/zip");
+        startActivityForResult(intent, GOT_CONTENT);
+    }
+
+    public void msg(String str)
+    {
+        Toast.makeText(this, str, Toast.LENGTH_SHORT)
+             .show();
+    }
+
+    public class WebViewInterface {
+
+        @JavascriptInterface
+        public void command(String cmd) {
+            switch(cmd)
+            {
+                case "install":
+                    install();
+                    break;
+                default:
+                    msg("Unkown command: "+cmd);
+            }
+        }
+    }
+
 
 }
