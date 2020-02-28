@@ -19,20 +19,11 @@
 
 package uk.co.rogerstech.servalot;
 
-import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
@@ -75,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                     catch(FileNotFoundException ex) {
-                        Toast.makeText(this, "Can't open file.", Toast.LENGTH_LONG).show();
+                        msg("Can't open file.");
                     }
 
 
@@ -116,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void msg(String str)
     {
-        Toast.makeText(this, str, Toast.LENGTH_SHORT)
+        Toast.makeText(this, str, Toast.LENGTH_LONG)
              .show();
     }
 
