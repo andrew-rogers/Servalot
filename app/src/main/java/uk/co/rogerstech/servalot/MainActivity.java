@@ -37,12 +37,13 @@ public class MainActivity extends AppCompatActivity {
 
     private PackageManager packageManager;
     private static final int GOT_CONTENT = 1;
+    private WebView webView = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final WebView webView = new WebView(this);
+        webView = new WebView(this);
         setContentView(webView);
 
         initWebView(webView);
@@ -87,9 +88,19 @@ public class MainActivity extends AppCompatActivity {
         String html = "<html><body>\n"
                     + "<input type=\"button\" value=\"Install package...\" onClick=\"command('install')\" />\n"
                     + "<input type=\"button\" value=\"Thing\" onClick=\"command('thing')\" />\n"
+                    + "<br><textarea id=\"ta_log\" rows=20></textarea>\n"
                     + "<script type=\"text/javascript\">\n"
+                    + "var ta = document.getElementById(\"ta_log\");\n"
+                    + "ta.style.width=\"100%\";\n"
+                    + "function log(str) {\n"
+                    + "    ta.value = ta.value + str + \"\\n\";\n"
+                    + "}\n"
                     + "function command(cmd) {\n"
                     + "    CommandHandler.command(cmd);\n"
+                    + "    log(\"C:\"+cmd);\n"
+                    + "}\n"
+                    + "function response(str) {\n"
+                    + "    log(\"R:\"+str);\n"
                     + "}\n"
                     + "</script>\n"
                     + "</body></html>\n";
@@ -109,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
     {
         Toast.makeText(this, str, Toast.LENGTH_LONG)
              .show();
+        sendToWebView(str);
     }
 
     public class WebViewInterface {
@@ -124,7 +136,19 @@ public class MainActivity extends AppCompatActivity {
                     msg("Unkown command: "+cmd);
             }
         }
+
     }
 
+    private void sendToWebView(final String json)
+    {
+        // evaluateJavscript can only be rum on UI thread.
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                webView.evaluateJavascript("response(\""+json+"\");", null);
+            }
+        });
+    }
 
 }
+
