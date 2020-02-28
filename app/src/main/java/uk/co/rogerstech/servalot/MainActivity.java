@@ -27,12 +27,9 @@ import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -45,70 +42,25 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-public class MainActivity extends AppCompatActivity implements ServiceRecyclerViewAdapter.ItemListener{
+public class MainActivity extends AppCompatActivity {
 
-    //private ServiceRecyclerViewAdapter rvaServices;
-    //private ServiceManager serviceManager;
     private PackageManager packageManager;
     private static final int GOT_CONTENT = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        final Button buttonInstall = findViewById(R.id.buttonInstall);
-        final EditText etName = findViewById(R.id.editName);
-        final WebView webView = (WebView) findViewById(R.id.webview);
 
-
-        Log.i("MainActivity","onCreate()");
+        final WebView webView = new WebView(this);
+        setContentView(webView);
 
         initWebView(webView);
 
         packageManager = new PackageManager(getFilesDir());
 
-        buttonInstall.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                intent.setType("application/zip");
-                startActivityForResult(intent, GOT_CONTENT);
-            }
-        });
-
-        etName.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                // If the event is a key-down event on the "enter" button
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
-                    (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                  // Perform action on key press
-                  editService(etName.getText().toString());
-                  return true;
-                }
-                return false;
-            }
-        });
-
         Intent i= new Intent(getBaseContext(), BackgroundService.class);
         startService(i);
 
-    }
-
-    @Override
-    public void onClick(Service service) {
-        Toast.makeText(this, "Service: " + service.getServiceName(), Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onEdit(Service service) {
-        Toast.makeText(this, "Service ed: " + service.getServiceName(), Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onDelete(Service service) {
-        Toast.makeText(this, "Service delete: " + service.getServiceName(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -131,28 +83,6 @@ public class MainActivity extends AppCompatActivity implements ServiceRecyclerVi
             break;
 
         }
-    }
-    public void editService(String name)
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = getLayoutInflater();
-
-        builder.setView(inflater.inflate(R.layout.configure_service, null));
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
-                // TODO: save the settings
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
-                // Do nothing.
-            }
-        });
-
-        Dialog dialog = builder.create();
-        dialog.show();
     }
 
     public void initWebView(WebView wv)
