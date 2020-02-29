@@ -32,9 +32,11 @@ public class RfcommNodeFactory implements NodeFactory {
     private String address = null;
     private Node node = null;
     private BluetoothSocket btSocket = null;
+    private Logger logger = null;
 
     RfcommNodeFactory(final String address) {
         this.address = address;
+        logger = Logger.getInstance();
 
         new ConnectRfcommTask().execute();
     }
@@ -52,8 +54,7 @@ public class RfcommNodeFactory implements NodeFactory {
 
     public void msg(String str)
     {
-        /*Toast.makeText(getApplicationContext(), str, Toast.LENGTH_LONG)
-             .show();*/
+        logger.info(str);
     }
 
     private class ConnectRfcommTask extends AsyncTask<Void, Void, Void> {

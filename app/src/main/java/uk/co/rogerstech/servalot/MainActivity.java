@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int GOT_CONTENT = 1;
     private static final int BT_ON = 2;
     private WebView webView = null;
+    private WebViewLogger logger = null;
     private RfcommHelper rfcomm = null;
 
     @Override
@@ -52,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(webView);
 
         initWebView(webView);
+
+        logger = new WebViewLogger();
 
         packageManager = new PackageManager(getFilesDir());
 
@@ -106,15 +109,7 @@ public class MainActivity extends AppCompatActivity {
     {
         Toast.makeText(this, str, Toast.LENGTH_LONG)
              .show();
-        JSONObject obj=new JSONObject();
-        try {
-            obj.put("cmd","log");
-            obj.put("arg",str);
-            sendToWebView(obj.toString());
-        }
-        catch(JSONException e) {
-		    // TODO
-        }
+        logger.info(str);
     }
 
     public class WebViewInterface {
@@ -145,6 +140,34 @@ public class MainActivity extends AppCompatActivity {
                 webView.evaluateJavascript("response(\"" + str.replace("\"","\\\"") + "\");", null);
             }
         });
+    }
+
+    public class WebViewLogger extends Logger {
+
+        WebViewLogger() {
+            instance = this;
+        }
+
+        public void error(final String str) {
+            log("error",str);
+        }
+
+        public void info(final String str) {
+            log("info",str);
+        }
+
+        private void log(final String type, final String str) {
+            JSONObject obj=new JSONObject();
+            try {
+                obj.put("cmd","log");
+                obj.put("type",type);
+                obj.put("arg",str);
+                sendToWebView(obj.toString());
+            }
+            catch(JSONException e) {
+		        // TODO
+            }
+        }
     }
 
 }

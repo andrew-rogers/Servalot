@@ -31,11 +31,13 @@ public class ServiceManager {
 
     private Vector<Service> vecServices;
     private Vector<TcpServer> vecTcpServers;
+    private Logger logger = null;
     private File root_dir;
     private File file;
     private File serviceDir;
 
     ServiceManager(File root_dir, File file){
+        this.logger = Logger.getInstance();
         this.root_dir=root_dir;
         this.file=file;
         serviceDir=new File(file.getParentFile(),"services");
