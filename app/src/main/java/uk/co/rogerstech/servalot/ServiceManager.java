@@ -30,6 +30,7 @@ import java.util.Vector;
 public class ServiceManager {
 
     private Vector<Service> vecServices;
+    private Vector<TcpServer> vecTcpServers;
     private File root_dir;
     private File file;
     private File serviceDir;
@@ -39,7 +40,9 @@ public class ServiceManager {
         this.file=file;
         serviceDir=new File(file.getParentFile(),"services");
         vecServices = new Vector<Service>();
+        vecTcpServers = new Vector<TcpServer>();
         load();
+        exampleHC05("20:16:07:04:79:81",8085);
     }
 
     void load(){
@@ -86,9 +89,18 @@ public class ServiceManager {
         }
     }
 
+    void exampleHC05(final String bt_address, final int port) {
+        RfcommNodeFactory factory = new RfcommNodeFactory(bt_address);
+        TcpServer tcp = new TcpServer(factory, "0.0.0.0", port);
+        vecTcpServers.add(tcp);
+    }
+
     void startAll(){
         for (int i = 0; i < vecServices.size(); i++) {
             vecServices.get(i).start();
+        }
+        for (int i = 0; i < vecTcpServers.size(); i++) {
+            vecTcpServers.get(i).start();
         }
     }
 

@@ -51,6 +51,11 @@ public class RfcommHelper{
         }
     }
 
+    /**
+     * Returns a JSONArray of all the paired Bluetooth devices.
+     *
+     * @return the JSONArray of all the paired Bluetooth devices.
+     */
     public JSONArray getDevices () {
         Set<BluetoothDevice> devices = bluetoothAdapter.getBondedDevices();
         JSONArray json = new JSONArray();
