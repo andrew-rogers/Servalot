@@ -1,0 +1,28 @@
+<html>
+    <body>
+        <input type="button" value="Install package..." onClick="command('install')" />
+        <input type="button" value="List RFCOMM devices" onClick="command('listBT')" />
+        <br>
+        <textarea id="ta_log" rows=20></textarea>
+        <script type="text/javascript">
+
+var ta = document.getElementById("ta_log");
+ta.style.width="100%";
+
+function log(str) {
+    ta.value = ta.value + str + "\n";
+}
+
+function command(cmd) {
+    CommandHandler.command(cmd);
+    log("C:"+cmd);
+}
+
+function response(str) {
+    log("R:"+str);
+}
+
+        </script>
+    </body>
+</html>
+

@@ -90,30 +90,8 @@ public class MainActivity extends AppCompatActivity {
         WebSettings settings = wv.getSettings();
         settings.setJavaScriptEnabled(true);
 
-
         wv.addJavascriptInterface(new WebViewInterface(), "CommandHandler");
-
-        String html = "<html><body>\n"
-                    + "<input type=\"button\" value=\"Install package...\" onClick=\"command('install')\" />\n"
-                    + "<input type=\"button\" value=\"List RFCOMM devices\" onClick=\"command('listBT')\" />\n"
-                    + "<br><textarea id=\"ta_log\" rows=20></textarea>\n"
-                    + "<script type=\"text/javascript\">\n"
-                    + "var ta = document.getElementById(\"ta_log\");\n"
-                    + "ta.style.width=\"100%\";\n"
-                    + "function log(str) {\n"
-                    + "    ta.value = ta.value + str + \"\\n\";\n"
-                    + "}\n"
-                    + "function command(cmd) {\n"
-                    + "    CommandHandler.command(cmd);\n"
-                    + "    log(\"C:\"+cmd);\n"
-                    + "}\n"
-                    + "function response(str) {\n"
-                    + "    log(\"R:\"+str);\n"
-                    + "}\n"
-                    + "</script>\n"
-                    + "</body></html>\n";
-
-        wv.loadData(html, "text/html", null);
+        wv.loadUrl("file:///android_asset/index.html");
     }
 
     public void install()
