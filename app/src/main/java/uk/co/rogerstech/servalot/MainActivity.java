@@ -33,11 +33,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
+import org.json.JSONObject;
+import org.json.JSONException;
+
 public class MainActivity extends AppCompatActivity {
 
     private PackageManager packageManager;
     private static final int GOT_CONTENT = 1;
+    private static final int BT_ON = 2;
     private WebView webView = null;
+    private RfcommHelper rfcomm = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +57,9 @@ public class MainActivity extends AppCompatActivity {
 
         Intent i= new Intent(getBaseContext(), BackgroundService.class);
         startService(i);
+
+        rfcomm = new RfcommHelper(this);
+        rfcomm.enableBluetooth(BT_ON);
 
     }
 
@@ -87,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
         String html = "<html><body>\n"
                     + "<input type=\"button\" value=\"Install package...\" onClick=\"command('install')\" />\n"
-                    + "<input type=\"button\" value=\"Thing\" onClick=\"command('thing')\" />\n"
+                    + "<input type=\"button\" value=\"List RFCOMM devices\" onClick=\"command('listBT')\" />\n"
                     + "<br><textarea id=\"ta_log\" rows=20></textarea>\n"
                     + "<script type=\"text/javascript\">\n"
                     + "var ta = document.getElementById(\"ta_log\");\n"
@@ -120,7 +128,15 @@ public class MainActivity extends AppCompatActivity {
     {
         Toast.makeText(this, str, Toast.LENGTH_LONG)
              .show();
-        sendToWebView(str);
+        JSONObject obj=new JSONObject();
+        try {
+            obj.put("cmd","log");
+            obj.put("arg",str);
+            sendToWebView(obj.toString());
+        }
+        catch(JSONException e) {
+		    // TODO
+        }
     }
 
     public class WebViewInterface {
@@ -132,6 +148,9 @@ public class MainActivity extends AppCompatActivity {
                 case "install":
                     install();
                     break;
+                case "listBT":
+                    sendToWebView(rfcomm.getDevices().toString());
+                    break;
                 default:
                     msg("Unkown command: "+cmd);
             }
@@ -139,13 +158,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void sendToWebView(final String json)
+    private void sendToWebView(final String str)
     {
-        // evaluateJavscript can only be rum on UI thread.
+        // evaluateJavscript can only be run on UI thread.
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                webView.evaluateJavascript("response(\""+json+"\");", null);
+                webView.evaluateJavascript("response(\"" + str.replace("\"","\\\"") + "\");", null);
             }
         });
     }
