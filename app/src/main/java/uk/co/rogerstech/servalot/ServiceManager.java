@@ -47,6 +47,7 @@ public class ServiceManager {
         this.logger = Logger.getInstance();
         this.root_dir=root_dir;
         this.file=file;
+        CommandHandler.getInstance().registerServiceManager(this);
         serviceDir=new File(file.getParentFile(),"services");
         vecServices = new Vector<Service>();
         vecTcpServers = new Vector<TcpServer>();
