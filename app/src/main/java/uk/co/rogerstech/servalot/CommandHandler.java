@@ -62,6 +62,7 @@ public class CommandHandler {
             String bind = obj.getString("bind");
             String port = obj.getString("port");
             serviceManager.createServiceFromTSV(name + "\t" + type + "\t" + address + "\t" + bind + "\t" + port);
+            serviceManager.save();
         }
         catch(JSONException e) {
             // TODO

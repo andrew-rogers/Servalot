@@ -33,7 +33,8 @@ public class Servalot {
 
         // Start service manager
         ServiceManager serviceManager = new ServiceManager(filesDir, new File(filesDir,"services.tsv"));
-        serviceManager.startAll();
+        // TODO: register NodeFactoryBuilders
+        serviceManager.load();
 
         // Endless loop (service threads should be running)
         int cnt=0;

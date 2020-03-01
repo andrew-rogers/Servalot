@@ -20,24 +20,25 @@
 package uk.co.rogerstech.servalot;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class ServiceManager {
 
     private Vector<Service> vecServices;
     private Vector<TcpServer> vecTcpServers;
     private HashMap<String, NodeFactory.Builder> builders;
+    private HashMap<String, Vector<String> > servers;
     private Logger logger = null;
     private File root_dir;
     private File file;
@@ -52,7 +53,7 @@ public class ServiceManager {
         vecServices = new Vector<Service>();
         vecTcpServers = new Vector<TcpServer>();
         builders = new HashMap<String, NodeFactory.Builder>();
-        load();
+        servers = new HashMap<String, Vector<String> >();
     }
 
     void load(){
@@ -72,6 +73,27 @@ public class ServiceManager {
         }
     }
 
+    public void save() {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+
+            for (Map.Entry entry : servers.entrySet()) {
+                String key = (String)entry.getKey();
+                Vector<String> vec = (Vector<String>)entry.getValue();
+                String line="";
+                for (String str : vec) line+=str+'\t';
+                writer.write(line.substring(0, line.length() - 1));
+                writer.newLine();
+            }
+
+            writer.close();
+        } catch (FileNotFoundException e) {
+            // Don't need to do anything if not found
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+	}
+
     void deleteAll(){
         for (int i = 0; i < vecServices.size(); i++) {
             vecServices.get(i).cleanUp();
@@ -82,9 +104,11 @@ public class ServiceManager {
     void createServiceFromTSV(String tsv){
         StringTokenizer tokenizer = new StringTokenizer(tsv,"\t");
         Vector<String> vec = new Vector<String>() ;
+
         while(tokenizer.hasMoreElements()){
             vec.add(tokenizer.nextElement().toString());
         }
+
         if(vec.size()>=5){
             String type = vec.get(1);
             if(type.equals("sh")) {
@@ -94,6 +118,8 @@ public class ServiceManager {
                 cmd.add(exec.getPath());
                 Service service = new Service(vec.get(0), root_dir, cmd, vec.get(3), Integer.parseInt(vec.get(4)));
                 vecServices.add(service);
+                servers.put(vec.get(vec.size()-1), vec);
+                service.start();
             }
             else createTcpServer(vec);
         }
@@ -110,19 +136,13 @@ public class ServiceManager {
             String port = vec.get(vec.size()-1);
 
             NodeFactory.Builder builder = builders.get(type);
-            NodeFactory factory = builder.build(serviceArgs);
-            TcpServer tcp = new TcpServer(factory, bind, Integer.parseInt(port));
-            vecTcpServers.add(tcp);
-            tcp.start();
-        }
-    }
-
-    void startAll(){
-        for (int i = 0; i < vecServices.size(); i++) {
-            vecServices.get(i).start();
-        }
-        for (int i = 0; i < vecTcpServers.size(); i++) {
-            vecTcpServers.get(i).start();
+            if(builder!=null) {
+                NodeFactory factory = builder.build(serviceArgs);
+                TcpServer tcp = new TcpServer(factory, bind, Integer.parseInt(port));
+                vecTcpServers.add(tcp);
+                servers.put(port, vec);
+                tcp.start();
+            }
         }
     }
 
