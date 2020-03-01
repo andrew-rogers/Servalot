@@ -26,6 +26,10 @@ import android.os.AsyncTask;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.List;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class RfcommNodeFactory implements NodeFactory {
 
@@ -93,6 +97,25 @@ public class RfcommNodeFactory implements NodeFactory {
             } else {
                 msg("Connected");
             }
+        }
+    }
+
+    public static class Builder implements NodeFactory.Builder {
+
+        public RfcommNodeFactory build(final JSONObject conf) {
+            RfcommNodeFactory factory = null;
+            try {
+                String address = conf.getString("address");
+                factory = new RfcommNodeFactory(address);
+            } catch(JSONException e) {
+	            // TODO
+            }
+            return factory;
+        }
+
+        public RfcommNodeFactory build(final List<String> conf) {
+            String address = conf.get(0);
+            return new RfcommNodeFactory(address);
         }
     }
 }

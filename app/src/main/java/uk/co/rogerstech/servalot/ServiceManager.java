@@ -24,13 +24,20 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class ServiceManager {
 
     private Vector<Service> vecServices;
     private Vector<TcpServer> vecTcpServers;
+    private HashMap<String, NodeFactory.Builder> builders;
     private Logger logger = null;
     private File root_dir;
     private File file;
@@ -43,8 +50,8 @@ public class ServiceManager {
         serviceDir=new File(file.getParentFile(),"services");
         vecServices = new Vector<Service>();
         vecTcpServers = new Vector<TcpServer>();
+        builders = new HashMap<String, NodeFactory.Builder>();
         load();
-        exampleHC05("20:16:07:04:79:81",8085);
     }
 
     void load(){
@@ -87,14 +94,25 @@ public class ServiceManager {
                 Service service = new Service(vec.get(0), root_dir, cmd, vec.get(3), Integer.parseInt(vec.get(4)));
                 vecServices.add(service);
             }
-            // TODO: Support HC-05
+            else createTcpServer(vec);
         }
+        else createTcpServer(vec);
     }
 
-    void exampleHC05(final String bt_address, final int port) {
-        RfcommNodeFactory factory = new RfcommNodeFactory(bt_address);
-        TcpServer tcp = new TcpServer(factory, "0.0.0.0", port);
-        vecTcpServers.add(tcp);
+    void createTcpServer(final Vector<String> vec) {
+        if(vec.size()>=4) {
+            String name = vec.get(0);
+            String type = vec.get(1);
+            List<String> serviceArgs = new ArrayList<String>();
+            serviceArgs = vec.subList(2, vec.size()-2);
+            String bind = vec.get(vec.size()-2);
+            String port = vec.get(vec.size()-1);
+
+            NodeFactory.Builder builder = builders.get(type);
+            NodeFactory factory = builder.build(serviceArgs);
+            TcpServer tcp = new TcpServer(factory, bind, Integer.parseInt(port));
+            vecTcpServers.add(tcp);
+        }
     }
 
     void startAll(){
@@ -112,5 +130,9 @@ public class ServiceManager {
 
     int size(){
         return vecServices.size();
+    }
+
+    public void registerNodeFactoryBuilder(final String name, NodeFactory.Builder builder) {
+        builders.put(name, builder);
     }
 }

@@ -19,7 +19,16 @@
 
 package uk.co.rogerstech.servalot;
 
+import java.util.List;
+
+import org.json.JSONObject;
+
 interface NodeFactory {
     public Node createNode();
+
+    interface Builder {
+        NodeFactory build(JSONObject conf);
+        NodeFactory build(final List<String> conf);
+    }
 }
 
