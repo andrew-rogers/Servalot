@@ -27,5 +27,6 @@ abstract class Logger {
 
     abstract void error(final String str);
     abstract void info(final String str);
+    abstract void toast(final String str);
 }
 

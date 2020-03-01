@@ -156,6 +156,11 @@ public class MainActivity extends AppCompatActivity {
             log("info",str);
         }
 
+        public void toast(final String str) {
+            Toast.makeText(getApplicationContext(), str, Toast.LENGTH_LONG)
+             .show();
+        }
+
         private void log(final String type, final String str) {
             JSONObject obj=new JSONObject();
             try {
