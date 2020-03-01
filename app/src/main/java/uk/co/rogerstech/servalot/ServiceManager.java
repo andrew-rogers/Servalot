@@ -35,8 +35,6 @@ import java.util.Vector;
 
 public class ServiceManager {
 
-    private Vector<Service> vecServices;
-    private Vector<TcpServer> vecTcpServers;
     private HashMap<String, NodeFactory.Builder> builders;
     private HashMap<String, Vector<String> > servers;
     private Logger logger = null;
@@ -50,8 +48,6 @@ public class ServiceManager {
         this.file=file;
         CommandHandler.getInstance().registerServiceManager(this);
         serviceDir=new File(file.getParentFile(),"services");
-        vecServices = new Vector<Service>();
-        vecTcpServers = new Vector<TcpServer>();
         builders = new HashMap<String, NodeFactory.Builder>();
         servers = new HashMap<String, Vector<String> >();
     }
@@ -61,7 +57,6 @@ public class ServiceManager {
             BufferedReader reader = new BufferedReader(new FileReader(file));
 
             String line;
-            deleteAll();
             while ((line = reader.readLine()) != null){
                 createServiceFromTSV(line);
             }
@@ -94,13 +89,6 @@ public class ServiceManager {
         }
 	}
 
-    void deleteAll(){
-        for (int i = 0; i < vecServices.size(); i++) {
-            vecServices.get(i).cleanUp();
-        }
-        vecServices.clear();
-    }
-
     void createServiceFromTSV(String tsv){
         StringTokenizer tokenizer = new StringTokenizer(tsv,"\t");
         Vector<String> vec = new Vector<String>() ;
@@ -117,7 +105,6 @@ public class ServiceManager {
                 cmd.add("sh");
                 cmd.add(exec.getPath());
                 Service service = new Service(vec.get(0), root_dir, cmd, vec.get(3), Integer.parseInt(vec.get(4)));
-                vecServices.add(service);
                 servers.put(vec.get(vec.size()-1), vec);
                 service.start();
             }
@@ -139,19 +126,10 @@ public class ServiceManager {
             if(builder!=null) {
                 NodeFactory factory = builder.build(serviceArgs);
                 TcpServer tcp = new TcpServer(factory, bind, Integer.parseInt(port));
-                vecTcpServers.add(tcp);
                 servers.put(port, vec);
                 tcp.start();
             }
         }
-    }
-
-    Service get(int position){
-        return vecServices.get(position);
-    }
-
-    int size(){
-        return vecServices.size();
     }
 
     public void registerNodeFactoryBuilder(final String name, NodeFactory.Builder builder) {
