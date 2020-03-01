@@ -113,6 +113,7 @@ public class ServiceManager {
             NodeFactory factory = builder.build(serviceArgs);
             TcpServer tcp = new TcpServer(factory, bind, Integer.parseInt(port));
             vecTcpServers.add(tcp);
+            tcp.start();
         }
     }
 

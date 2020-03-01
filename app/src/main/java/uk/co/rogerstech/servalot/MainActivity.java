@@ -33,8 +33,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import org.json.JSONObject;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                     catch(FileNotFoundException ex) {
-                        msg("Can't open file.");
+                        logger.error("Can't open file.");
                     }
 
 
@@ -106,30 +106,34 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, GOT_CONTENT);
     }
 
-    public void msg(String str)
-    {
-        Toast.makeText(this, str, Toast.LENGTH_LONG)
-             .show();
-        logger.info(str);
-    }
-
     public class WebViewInterface {
 
         @JavascriptInterface
         public void command(String cmd) {
-            switch(cmd)
-            {
-                case "install":
-                    install();
-                    break;
-                case "listBT":
-                    sendToWebView(rfcomm.getDevices().toString());
-                    break;
-                case "ready":
-                    wvReady = true;
-                    break;
-                default:
-                    msg("Unkown command: "+cmd);
+            if( cmd.charAt(0) == '{' ) {
+                try {
+                    JSONObject obj = new JSONObject(cmd);
+                    CommandHandler.getInstance().command(obj);
+                }
+                catch(JSONException e) {
+		            // TODO
+                }
+            } else {
+                switch(cmd)
+                {
+                    case "install":
+                        install();
+                        break;
+                    case "listBT":
+                        sendToWebView(rfcomm.getDevices().toString());
+                        break;
+                    case "ready":
+                        wvReady = true;
+                        logger.toast("WebView ready.");
+                        break;
+                    default:
+                        logger.error("Unkown command: "+cmd);
+                }
             }
         }
 

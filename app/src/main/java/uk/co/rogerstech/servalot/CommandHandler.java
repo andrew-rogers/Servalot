@@ -19,11 +19,14 @@
 
 package uk.co.rogerstech.servalot;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class CommandHandler {
 
     private static CommandHandler instance = null;
     private ServiceManager serviceManager = null;
-    
+    private Logger logger = Logger.getInstance();
 
     static CommandHandler getInstance() {
         if (instance==null) instance = new CommandHandler();
@@ -32,6 +35,37 @@ public class CommandHandler {
 
     public void registerServiceManager(ServiceManager sm) {
         serviceManager = sm;
+    }
+
+    public void command(final JSONObject obj) {
+        try {
+            String cmd = obj.getString("cmd");
+            switch(cmd)
+            {
+                case "add service":
+                    addService(obj);
+                    break;
+                default:
+                    logger.error("Unkown command: "+cmd);
+            }
+        }
+        catch(JSONException e) {
+            // TODO
+        }
+    }
+
+    private void addService(final JSONObject obj) {
+        try {
+            String name = obj.getString("name");
+            String type = obj.getString("type");
+            String address = obj.getString("address");
+            String bind = obj.getString("bind");
+            String port = obj.getString("port");
+            serviceManager.createServiceFromTSV(name + "\t" + type + "\t" + address + "\t" + bind + "\t" + port);
+        }
+        catch(JSONException e) {
+            // TODO
+        }
     }
 
 }

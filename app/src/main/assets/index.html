@@ -2,6 +2,7 @@
     <body>
         <input type="button" value="Install package..." onClick="command('install')" />
         <input type="button" value="List RFCOMM devices" onClick="command('listBT')" />
+        <input type="button" value="Connect" onClick="connect()" />
         <br>
         <textarea id="ta_log" rows=20></textarea>
         <script type="text/javascript">
@@ -20,6 +21,18 @@ function command(cmd) {
 
 function response(str) {
     log("R:"+str);
+}
+
+function connect() {
+    var cmd = {};
+    cmd["cmd"]="add service";
+    cmd["name"]="My Bluetooth gadget";
+    cmd["type"]="rfcomm";
+    cmd["address"]="20:16:07:04:79:81";
+    cmd["bind"]="0.0.0.0";
+    cmd["port"]="8085";
+    var json = JSON.stringify(cmd);
+    CommandHandler.command(json);
 }
 
 CommandHandler.command('ready');

@@ -36,7 +36,6 @@ public class BackgroundService extends Service {
         // Start service manager
         serviceManager = new ServiceManager(getFilesDir(), new File(getFilesDir(),"services.tsv"));
         serviceManager.registerNodeFactoryBuilder("rfcomm", new RfcommNodeFactory.Builder());
-        serviceManager.createServiceFromTSV("My Bluetooth gadget\trfcomm\t20:16:07:04:79:81\t0.0.0.0\t8085");
         serviceManager.startAll();
 
         return START_STICKY;
