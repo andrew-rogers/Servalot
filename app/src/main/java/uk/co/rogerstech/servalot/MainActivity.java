@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView = null;
     private WebViewLogger logger = null;
     private RfcommHelper rfcomm = null;
+    private boolean wvReady = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +125,9 @@ public class MainActivity extends AppCompatActivity {
                 case "listBT":
                     sendToWebView(rfcomm.getDevices().toString());
                     break;
+                case "ready":
+                    wvReady = true;
+                    break;
                 default:
                     msg("Unkown command: "+cmd);
             }
@@ -149,11 +153,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void error(final String str) {
-            log("error",str);
+            log("E",str);
         }
 
         public void info(final String str) {
-            log("info",str);
+            log("I",str);
         }
 
         public void toast(final String str) {
@@ -162,15 +166,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void log(final String type, final String str) {
-            JSONObject obj=new JSONObject();
-            try {
-                obj.put("cmd","log");
-                obj.put("type",type);
-                obj.put("arg",str);
-                sendToWebView(obj.toString());
+            if(wvReady) {
+                JSONObject obj=new JSONObject();
+                try {
+                    obj.put("cmd","log");
+                    obj.put("type",type);
+                    obj.put("arg",str);
+                    sendToWebView(obj.toString());
+                }
+                catch(JSONException e) {
+		            // TODO
+                }
             }
-            catch(JSONException e) {
-		        // TODO
+            else {
+                toast(type+": "+str);
             }
         }
     }
