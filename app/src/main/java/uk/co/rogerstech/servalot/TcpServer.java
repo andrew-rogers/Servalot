@@ -44,19 +44,21 @@ public class TcpServer extends Thread {
         try {
             ServerSocket serverSocket = new ServerSocket(port);
 
-            // Wait connection then accept
-            Socket socket = serverSocket.accept();
+            while(true) {
+                // Wait connection then accept
+                Socket socket = serverSocket.accept();
 
-            // Create the peer node
-            Node peer = peerFactory.createNode();
+                // Create the peer node
+                Node peer = peerFactory.createNode();
 
-            // Start peer to socket thread
-            StreamConnectorThread peer2socket = new StreamConnectorThread(peer.getInputStream(), socket.getOutputStream());
-            peer2socket.start();
+                // Start peer to socket thread
+                StreamConnectorThread peer2socket = new StreamConnectorThread(peer.getInputStream(), socket.getOutputStream());
+                peer2socket.start();
 
-            // Start socket to peer thread.
-            StreamConnectorThread socket2peer = new StreamConnectorThread(socket.getInputStream(), peer.getOutputStream());
-            socket2peer.start();
+                // Start socket to peer thread.
+                StreamConnectorThread socket2peer = new StreamConnectorThread(socket.getInputStream(), peer.getOutputStream());
+                socket2peer.start();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();

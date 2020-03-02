@@ -97,20 +97,7 @@ public class ServiceManager {
             vec.add(tokenizer.nextElement().toString());
         }
 
-        if(vec.size()>=5){
-            String type = vec.get(1);
-            if(type.equals("sh")) {
-                File exec = new File(serviceDir, vec.get(2));
-                Vector<String> cmd = new Vector<String>();
-                cmd.add("sh");
-                cmd.add(exec.getPath());
-                Service service = new Service(vec.get(0), root_dir, cmd, vec.get(3), Integer.parseInt(vec.get(4)));
-                servers.put(vec.get(vec.size()-1), vec);
-                service.start();
-            }
-            else createTcpServer(vec);
-        }
-        else createTcpServer(vec);
+        createTcpServer(vec);
     }
 
     void createTcpServer(final Vector<String> vec) {
@@ -118,7 +105,7 @@ public class ServiceManager {
             String name = vec.get(0);
             String type = vec.get(1);
             List<String> serviceArgs = new ArrayList<String>();
-            serviceArgs = vec.subList(2, vec.size()-2);
+            serviceArgs = vec.subList(1, vec.size()-2);
             String bind = vec.get(vec.size()-2);
             String port = vec.get(vec.size()-1);
 
