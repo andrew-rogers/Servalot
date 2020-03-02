@@ -46,7 +46,6 @@ public class ServiceManager {
         this.logger = Logger.getInstance();
         this.root_dir=root_dir;
         this.file=file;
-        CommandHandler.getInstance().registerServiceManager(this);
         serviceDir=new File(file.getParentFile(),"services");
         builders = new HashMap<String, NodeFactory.Builder>();
         servers = new HashMap<String, Vector<String> >();

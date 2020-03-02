@@ -19,31 +19,40 @@
 
 package uk.co.rogerstech.servalot;
 
+import java.io.OutputStream;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class CommandHandler {
 
     private static CommandHandler instance = null;
-    private ServiceManager serviceManager = null;
     private Logger logger = Logger.getInstance();
+    private RfcommHelper rfcomm = null;
+    private ServiceManager serviceManager = null;
 
     static CommandHandler getInstance() {
         if (instance==null) instance = new CommandHandler();
         return instance;
     }
 
+    public void registerRfcommHelper(RfcommHelper r) {
+        rfcomm = r;
+    }
+
     public void registerServiceManager(ServiceManager sm) {
         serviceManager = sm;
     }
 
-    public void command(final JSONObject obj) {
+    public void command(final JSONObject obj, CommandResponseListener l) {
         try {
             String cmd = obj.getString("cmd");
             switch(cmd)
             {
                 case "add service":
                     addService(obj);
+                    break;
+                case "get bluetooth devices":
+                    getBT(l);
                     break;
                 default:
                     logger.error("Unkown command: "+cmd);
@@ -63,6 +72,18 @@ public class CommandHandler {
             String port = obj.getString("port");
             serviceManager.createServiceFromTSV(name + "\t" + type + "\t" + address + "\t" + bind + "\t" + port);
             serviceManager.save();
+        }
+        catch(JSONException e) {
+            // TODO
+        }
+    }
+
+    private void getBT(CommandResponseListener l) {
+        JSONObject obj=new JSONObject();
+        try {
+            obj.put("response","get bluetooth devices");
+            obj.put("devs",rfcomm.getDevices());
+            l.onResponse(obj);
         }
         catch(JSONException e) {
             // TODO

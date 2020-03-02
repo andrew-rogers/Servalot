@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
         startService(i);
 
         rfcomm = new RfcommHelper(this);
+        CommandHandler.getInstance().registerRfcommHelper(rfcomm);
         rfcomm.enableBluetooth(BT_ON);
 
     }
@@ -113,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
             if( cmd.charAt(0) == '{' ) {
                 try {
                     JSONObject obj = new JSONObject(cmd);
-                    CommandHandler.getInstance().command(obj);
+                    CommandHandler.getInstance().command(obj,logger);
                 }
                 catch(JSONException e) {
 		            // TODO
@@ -123,9 +124,6 @@ public class MainActivity extends AppCompatActivity {
                 {
                     case "install":
                         install();
-                        break;
-                    case "listBT":
-                        sendToWebView(rfcomm.getDevices().toString());
                         break;
                     case "ready":
                         wvReady = true;
@@ -150,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public class WebViewLogger extends Logger {
+    public class WebViewLogger extends Logger implements CommandResponseListener {
 
         WebViewLogger() {
             instance = this;
@@ -185,6 +183,10 @@ public class MainActivity extends AppCompatActivity {
             else {
                 toast(type+": "+str);
             }
+        }
+
+        public void onResponse(final JSONObject obj) {
+            sendToWebView(obj.toString());
         }
     }
 
