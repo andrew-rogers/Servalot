@@ -22,6 +22,7 @@ package uk.co.rogerstech.servalot;
 import java.io.OutputStream;
 import java.util.HashMap;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -57,10 +58,76 @@ public class CommandHandler {
         }
     }
 
+    static class CommandArgs {
+        private JSONObject obj_cmd = null;
+        private JSONObject obj_response = null;
+        private ResponseListener response_listener = null;
+
+        CommandArgs(final JSONObject cmd, ResponseListener l) {
+            obj_cmd = cmd;
+            response_listener = l;
+            obj_response=new JSONObject();
+            try {
+                obj_response.put("cb_num",cmd.getString("cb_num"));
+            }
+            catch(JSONException e) {
+                // TODO
+            }
+        }
+
+        public String getString(final String key) {
+            String ret = null;
+            try {
+                ret = obj_cmd.getString(key);
+            }
+            catch(JSONException e) {
+                ret = null;
+            }
+            return ret;
+        }
+
+        public boolean put(final String key, final JSONArray value) {
+            boolean ret = true;
+            try {
+                obj_response.put(key,value);
+            }
+            catch(JSONException e) {
+                ret = false;
+            }
+            return ret;
+        }
+
+        public boolean put(final String key, final JSONObject value) {
+            boolean ret = true;
+            try {
+                obj_response.put(key,value);
+            }
+            catch(JSONException e) {
+                ret = false;
+            }
+            return ret;
+        }
+
+        public boolean put(final String key, final String value) {
+            boolean ret = true;
+            try {
+                obj_response.put(key,value);
+            }
+            catch(JSONException e) {
+                ret = false;
+            }
+            return ret;
+        }
+
+        public void respond() {
+            response_listener.sendResponse(obj_response);
+        }
+    }
+
     abstract static class Command {
         private String name;
 
-        abstract void onExecute(final JSONObject cmd, ResponseListener l);
+        abstract void onExecute(CommandHandler.CommandArgs args);
 
         protected void setName(String name) {
             this.name = name;
@@ -71,7 +138,7 @@ public class CommandHandler {
         }
 
         public void execute(final JSONObject cmd, ResponseListener l) {
-            onExecute(cmd, l);
+            onExecute(new CommandHandler.CommandArgs(cmd, l));
         }
     }
 

@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
             setName("install");
         }
 
-        public void onExecute(final JSONObject cmd, CommandHandler.ResponseListener l) {
+        public void onExecute(CommandHandler.CommandArgs args) {
             Intent intent = new Intent();
             intent.setAction(Intent.ACTION_GET_CONTENT);
             intent.setType("application/zip");
@@ -158,17 +158,10 @@ public class MainActivity extends AppCompatActivity {
             setName("get bluetooth devices");
         }
 
-        public void onExecute(final JSONObject cmd, CommandHandler.ResponseListener l) {
-            JSONObject obj=new JSONObject();
-            try {
-                obj.put("cb_num",cmd.getString("cb_num"));
-                obj.put("response","get bluetooth devices");
-                obj.put("devs",rfcomm.getDevices());
-                l.sendResponse(obj);
-            }
-            catch(JSONException e) {
-                // TODO
-            }
+        public void onExecute(CommandHandler.CommandArgs args) {
+            args.put("response","get bluetooth devices");
+            args.put("devs",rfcomm.getDevices());
+            args.respond();
         }
     }
 
@@ -178,14 +171,9 @@ public class MainActivity extends AppCompatActivity {
             setName("ready");
         }
 
-        public void onExecute(final JSONObject cmd, CommandHandler.ResponseListener l) {
-            try{
-                wvReady = true;
-                logger.toast("WebView ready. "+cmd.getString("msg"));
-            }
-            catch(JSONException e) {
-                // TODO
-            }
+        public void onExecute(CommandHandler.CommandArgs args) {
+            wvReady = true;
+            logger.toast("WebView ready. "+args.getString("msg"));
         }
     }
 

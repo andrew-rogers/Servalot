@@ -132,21 +132,14 @@ public class ServiceManager {
             setName("add service");
         }
 
-        public void onExecute(final JSONObject cmd, CommandHandler.ResponseListener l) {
-            try {
-                String name = cmd.getString("name");
-                String type = cmd.getString("type");
-                String address = cmd.getString("address");
-                String bind = cmd.getString("bind");
-                String port = cmd.getString("port");
-                createServiceFromTSV(name + "\t" + type + "\t" + address + "\t" + bind + "\t" + port);
-                save();
-
-                // TODO: send a response
-            }
-            catch(JSONException e) {
-                // TODO
-            }
+        public void onExecute(CommandHandler.CommandArgs args) {
+            String name = args.getString("name");
+            String type = args.getString("type");
+            String address = args.getString("address");
+            String bind = args.getString("bind");
+            String port = args.getString("port");
+            createServiceFromTSV(name + "\t" + type + "\t" + address + "\t" + bind + "\t" + port);
+            save();
         }
     }
 }
