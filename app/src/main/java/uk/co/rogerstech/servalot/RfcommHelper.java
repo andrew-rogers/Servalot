@@ -38,6 +38,7 @@ public class RfcommHelper{
 
     RfcommHelper(Activity activity){
         this.activity = activity;
+        CommandHandler.getInstance().registerCommand(new CommandGetBTDevs());
     }
 
     public void enableBluetooth(final int requestCode) {
@@ -76,6 +77,19 @@ public class RfcommHelper{
         }
 
         return json;
+    }
+
+    public class CommandGetBTDevs extends CommandHandler.Command {
+
+        CommandGetBTDevs() {
+            setName("get bluetooth devices");
+        }
+
+        public void onExecute(CommandHandler.CommandArgs args) {
+            args.put("response","get bluetooth devices");
+            args.put("devs",getDevices());
+            args.respond();
+        }
     }
 
 }

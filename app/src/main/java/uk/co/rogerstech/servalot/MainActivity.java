@@ -23,40 +23,26 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
     private PackageManager packageManager;
     private static final int GOT_CONTENT = 1;
     private static final int BT_ON = 2;
-    private WebView webView = null;
-    private WebViewLogger logger = null;
+    private WebViewHelper webViewHelper = null;
+    private Logger logger = null;
     private RfcommHelper rfcomm = null;
-    private boolean wvReady = false;
-    private WebViewCommandResponseListener crl = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        webView = new WebView(this);
-        setContentView(webView);
+        webViewHelper = new WebViewHelper(this);
 
-        initWebView(webView);
-
-        logger = new WebViewLogger();
+        logger = Logger.getInstance();
 
         packageManager = new PackageManager(getFilesDir());
 
@@ -66,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         rfcomm = new RfcommHelper(this);
         rfcomm.enableBluetooth(BT_ON);
 
-        initCommandHandler(CommandHandler.getInstance());
+        CommandHandler.getInstance().registerCommand(new CommandInstall());
 
     }
 
@@ -79,63 +65,15 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         InputStream inputStream = getContentResolver().openInputStream(uri);
                         packageManager.install(inputStream);
-
                     }
                     catch(FileNotFoundException ex) {
                         logger.error("Can't open file.");
                     }
-
-
                 }
-            break;
-
+                break;
+            default:
+                // TODO
         }
-    }
-
-    public void initWebView(WebView wv)
-    {
-        WebSettings settings = wv.getSettings();
-        settings.setJavaScriptEnabled(true);
-
-        wv.addJavascriptInterface(new WebViewInterface(), "CommandHandler");
-        wv.loadUrl("file:///android_asset/index.html");
-    }
-
-    private void initCommandHandler(CommandHandler h) {
-        h.registerCommand(new CommandInstall());
-        h.registerCommand(new CommandGetBTDevs());
-        h.registerCommand(new CommandReady());
-        crl = new WebViewCommandResponseListener();
-    }
-
-    public class WebViewInterface {
-
-        @JavascriptInterface
-        public void command(String cmd) {
-            if( cmd.charAt(0) == '{' ) {
-                try {
-                    JSONObject obj = new JSONObject(cmd);
-                    CommandHandler.getInstance().command(obj, crl);
-                }
-                catch(JSONException e) {
-		            // TODO
-                }
-            } else {
-                logger.error("Unkown command: "+cmd);
-            }
-        }
-
-    }
-
-    private void sendToWebView(final String str)
-    {
-        // evaluateJavscript can only be run on UI thread.
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                webView.evaluateJavascript("CommandHandler.response(\"" + str.replace("\"","\\\"") + "\");", null);
-            }
-        });
     }
 
     public class CommandInstall extends CommandHandler.Command {
@@ -150,76 +88,6 @@ public class MainActivity extends AppCompatActivity {
             intent.setType("application/zip");
             startActivityForResult(intent, GOT_CONTENT);
         }
-    }
-
-    public class CommandGetBTDevs extends CommandHandler.Command {
-
-        CommandGetBTDevs() {
-            setName("get bluetooth devices");
-        }
-
-        public void onExecute(CommandHandler.CommandArgs args) {
-            args.put("response","get bluetooth devices");
-            args.put("devs",rfcomm.getDevices());
-            args.respond();
-        }
-    }
-
-    public class CommandReady extends CommandHandler.Command {
-
-        CommandReady() {
-            setName("ready");
-        }
-
-        public void onExecute(CommandHandler.CommandArgs args) {
-            wvReady = true;
-            logger.toast("WebView ready. "+args.getString("msg"));
-        }
-    }
-
-    public class WebViewCommandResponseListener extends CommandHandler.ResponseListener {
-        public void onResponse(final JSONObject obj) {
-            sendToWebView(obj.toString());
-        }
-    }
-
-    public class WebViewLogger extends Logger {
-
-        WebViewLogger() {
-            instance = this;
-        }
-
-        public void error(final String str) {
-            log("E",str);
-        }
-
-        public void info(final String str) {
-            log("I",str);
-        }
-
-        public void toast(final String str) {
-            Toast.makeText(getApplicationContext(), str, Toast.LENGTH_LONG)
-             .show();
-        }
-
-        private void log(final String type, final String str) {
-            if(wvReady) {
-                JSONObject obj=new JSONObject();
-                try {
-                    obj.put("cmd","log");
-                    obj.put("type",type);
-                    obj.put("arg",str);
-                    sendToWebView(obj.toString());
-                }
-                catch(JSONException e) {
-		            // TODO
-                }
-            }
-            else {
-                toast(type+": "+str);
-            }
-        }
-
     }
 
 }
