@@ -1,11 +1,13 @@
 <html>
     <head>
         <script src="Query.js"></script>
+        <script src="ConfigButton.js"></script>
+        <script src="RfcommControls.js"></script>
     </head>
     <body>
         <input type="button" value="Install package..." onClick="install()" />
         <input type="button" value="List Bluetooth devices" onClick="listBT()" />
-        <div id="div_controls">Controls div.</div>
+        <div id="div_controls"></div>
         <textarea id="ta_log" rows=20></textarea>
         <script type="text/javascript">
 
@@ -17,43 +19,17 @@ function log(str) {
     ta.value = ta.value + str + "\n";
 }
 
-function displayBTDevs(obj) {
-    if(obj.devs) {
-        div_controls.innerHTML="";
-        var devs=obj.devs;
-        for( var i=0; i<devs.length; i++) {
-            var btn = document.createElement("button");
-            var t = document.createTextNode(devs[i].name + " " + devs[i].address);
-            btn.appendChild(t);
-            btn.addEventListener("click", function(){
-                var address=this.innerText.slice(-17);
-                log(">"+address+"<");
-                connect(address);
-            });
-            div_controls.appendChild(btn);
-        }
-    }
-}
-
 query = new Query();
-
-function connect(address) {
-    var cmd = {};
-    cmd["cmd"]="add service";
-    cmd["name"]="My Bluetooth gadget";
-    cmd["type"]="rfcomm";
-    cmd["address"]=address;
-    cmd["bind"]="0.0.0.0";
-    cmd["port"]="8085";
-    query.query(cmd);
-}
 
 function install() {
     query.query({cmd: "install"});
 }
 
+let rf = new RfcommControls(function(obj, callback) {query.query(obj, callback);});
+div_controls.appendChild(rf.div);
+
 function listBT() {
-    query.query({cmd: "get bluetooth devices"}, function(obj) { displayBTDevs(obj); });
+    rf.show();
 }
 
 query.query({cmd: "ready", msg: "Hi!"});
