@@ -33,6 +33,9 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class ServiceManager {
 
     private HashMap<String, NodeFactory.Builder> builders;
@@ -49,6 +52,7 @@ public class ServiceManager {
         serviceDir=new File(file.getParentFile(),"services");
         builders = new HashMap<String, NodeFactory.Builder>();
         servers = new HashMap<String, Vector<String> >();
+        CommandHandler.getInstance().registerCommand(new CommandAddService());
     }
 
     void load(){
@@ -120,5 +124,29 @@ public class ServiceManager {
 
     public void registerNodeFactoryBuilder(final String name, NodeFactory.Builder builder) {
         builders.put(name, builder);
+    }
+
+    public class CommandAddService extends CommandHandler.Command {
+
+        CommandAddService() {
+            setName("add service");
+        }
+
+        public void onExecute(final JSONObject cmd, CommandHandler.ResponseListener l) {
+            try {
+                String name = cmd.getString("name");
+                String type = cmd.getString("type");
+                String address = cmd.getString("address");
+                String bind = cmd.getString("bind");
+                String port = cmd.getString("port");
+                createServiceFromTSV(name + "\t" + type + "\t" + address + "\t" + bind + "\t" + port);
+                save();
+
+                // TODO: send a response
+            }
+            catch(JSONException e) {
+                // TODO
+            }
+        }
     }
 }

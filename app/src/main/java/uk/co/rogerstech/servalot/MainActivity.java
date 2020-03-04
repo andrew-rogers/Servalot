@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private WebViewLogger logger = null;
     private RfcommHelper rfcomm = null;
     private boolean wvReady = false;
+    private WebViewCommandResponseListener crl = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +64,9 @@ public class MainActivity extends AppCompatActivity {
         startService(i);
 
         rfcomm = new RfcommHelper(this);
-        CommandHandler.getInstance().registerRfcommHelper(rfcomm);
         rfcomm.enableBluetooth(BT_ON);
+
+        initCommandHandler(CommandHandler.getInstance());
 
     }
 
@@ -99,12 +101,11 @@ public class MainActivity extends AppCompatActivity {
         wv.loadUrl("file:///android_asset/index.html");
     }
 
-    public void install()
-    {
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        intent.setType("application/zip");
-        startActivityForResult(intent, GOT_CONTENT);
+    private void initCommandHandler(CommandHandler h) {
+        h.registerCommand(new CommandInstall());
+        h.registerCommand(new CommandGetBTDevs());
+        h.registerCommand(new CommandReady());
+        crl = new WebViewCommandResponseListener();
     }
 
     public class WebViewInterface {
@@ -114,24 +115,13 @@ public class MainActivity extends AppCompatActivity {
             if( cmd.charAt(0) == '{' ) {
                 try {
                     JSONObject obj = new JSONObject(cmd);
-                    CommandHandler.getInstance().command(obj,logger);
+                    CommandHandler.getInstance().command(obj, crl);
                 }
                 catch(JSONException e) {
 		            // TODO
                 }
             } else {
-                switch(cmd)
-                {
-                    case "install":
-                        install();
-                        break;
-                    case "ready":
-                        wvReady = true;
-                        logger.toast("WebView ready.");
-                        break;
-                    default:
-                        logger.error("Unkown command: "+cmd);
-                }
+                logger.error("Unkown command: "+cmd);
             }
         }
 
@@ -143,12 +133,69 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                webView.evaluateJavascript("response(\"" + str.replace("\"","\\\"") + "\");", null);
+                webView.evaluateJavascript("CommandHandler.response(\"" + str.replace("\"","\\\"") + "\");", null);
             }
         });
     }
 
-    public class WebViewLogger extends Logger implements CommandResponseListener {
+    public class CommandInstall extends CommandHandler.Command {
+
+        CommandInstall() {
+            setName("install");
+        }
+
+        public void onExecute(final JSONObject cmd, CommandHandler.ResponseListener l) {
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            intent.setType("application/zip");
+            startActivityForResult(intent, GOT_CONTENT);
+        }
+    }
+
+    public class CommandGetBTDevs extends CommandHandler.Command {
+
+        CommandGetBTDevs() {
+            setName("get bluetooth devices");
+        }
+
+        public void onExecute(final JSONObject cmd, CommandHandler.ResponseListener l) {
+            JSONObject obj=new JSONObject();
+            try {
+                obj.put("cb_num",cmd.getString("cb_num"));
+                obj.put("response","get bluetooth devices");
+                obj.put("devs",rfcomm.getDevices());
+                l.sendResponse(obj);
+            }
+            catch(JSONException e) {
+                // TODO
+            }
+        }
+    }
+
+    public class CommandReady extends CommandHandler.Command {
+
+        CommandReady() {
+            setName("ready");
+        }
+
+        public void onExecute(final JSONObject cmd, CommandHandler.ResponseListener l) {
+            try{
+                wvReady = true;
+                logger.toast("WebView ready. "+cmd.getString("msg"));
+            }
+            catch(JSONException e) {
+                // TODO
+            }
+        }
+    }
+
+    public class WebViewCommandResponseListener extends CommandHandler.ResponseListener {
+        public void onResponse(final JSONObject obj) {
+            sendToWebView(obj.toString());
+        }
+    }
+
+    public class WebViewLogger extends Logger {
 
         WebViewLogger() {
             instance = this;
@@ -185,9 +232,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        public void onResponse(final JSONObject obj) {
-            sendToWebView(obj.toString());
-        }
     }
 
 }

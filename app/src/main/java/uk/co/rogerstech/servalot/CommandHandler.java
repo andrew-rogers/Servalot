@@ -20,73 +20,66 @@
 package uk.co.rogerstech.servalot;
 
 import java.io.OutputStream;
+import java.util.HashMap;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class CommandHandler {
 
     private static CommandHandler instance = null;
-    private Logger logger = Logger.getInstance();
-    private RfcommHelper rfcomm = null;
-    private ServiceManager serviceManager = null;
+    private HashMap<String, Command> commands = null;
+    private Logger logger = null;
+
+    CommandHandler() {
+        commands = new HashMap<String, Command>();
+        logger = Logger.getInstance();
+    }
 
     static CommandHandler getInstance() {
         if (instance==null) instance = new CommandHandler();
         return instance;
     }
 
-    public void registerRfcommHelper(RfcommHelper r) {
-        rfcomm = r;
+    public void registerCommand(Command command) {
+        commands.put(command.getName(), command);
     }
 
-    public void registerServiceManager(ServiceManager sm) {
-        serviceManager = sm;
-    }
-
-    public void command(final JSONObject obj, CommandResponseListener l) {
+    public void command(final JSONObject obj, ResponseListener l) {
         try {
-            String cmd = obj.getString("cmd");
-            switch(cmd)
-            {
-                case "add service":
-                    addService(obj);
-                    break;
-                case "get bluetooth devices":
-                    getBT(l);
-                    break;
-                default:
-                    logger.error("Unkown command: "+cmd);
-            }
+            String str_cmd = obj.getString("cmd");
+            Command cmd = commands.get(str_cmd);
+            if (cmd!=null) cmd.execute(obj, l);
+            else logger.error("Unknown command: "+cmd);
         }
         catch(JSONException e) {
             // TODO
         }
     }
 
-    private void addService(final JSONObject obj) {
-        try {
-            String name = obj.getString("name");
-            String type = obj.getString("type");
-            String address = obj.getString("address");
-            String bind = obj.getString("bind");
-            String port = obj.getString("port");
-            serviceManager.createServiceFromTSV(name + "\t" + type + "\t" + address + "\t" + bind + "\t" + port);
-            serviceManager.save();
+    abstract static class Command {
+        private String name;
+
+        abstract void onExecute(final JSONObject cmd, ResponseListener l);
+
+        protected void setName(String name) {
+            this.name = name;
         }
-        catch(JSONException e) {
-            // TODO
+
+        public String getName() {
+            return name;
+        }
+
+        public void execute(final JSONObject cmd, ResponseListener l) {
+            onExecute(cmd, l);
         }
     }
 
-    private void getBT(CommandResponseListener l) {
-        JSONObject obj=new JSONObject();
-        try {
-            obj.put("response","get bluetooth devices");
-            obj.put("devs",rfcomm.getDevices());
-            l.onResponse(obj);
-        }
-        catch(JSONException e) {
-            // TODO
+    abstract static class ResponseListener {
+        abstract void onResponse(final JSONObject obj);
+
+        public void sendResponse(final JSONObject obj) {
+            onResponse(obj);
         }
     }
 

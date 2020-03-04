@@ -1,6 +1,9 @@
 <html>
+    <head>
+        <script src="Query.js"></script>
+    </head>
     <body>
-        <input type="button" value="Install package..." onClick="command('install')" />
+        <input type="button" value="Install package..." onClick="install()" />
         <input type="button" value="List Bluetooth devices" onClick="listBT()" />
         <div id="div_controls">Controls div.</div>
         <textarea id="ta_log" rows=20></textarea>
@@ -14,17 +17,7 @@ function log(str) {
     ta.value = ta.value + str + "\n";
 }
 
-function command(cmd) {
-    CommandHandler.command(cmd);
-    log("C:"+cmd);
-}
-
-function response(str) {
-    log("R:"+str);
-    if(str[0]=='{') jsonResponse(JSON.parse(str));
-}
-
-function jsonResponse(obj) {
+function displayBTDevs(obj) {
     if(obj.devs) {
         div_controls.innerHTML="";
         var devs=obj.devs;
@@ -42,6 +35,8 @@ function jsonResponse(obj) {
     }
 }
 
+query = new Query();
+
 function connect(address) {
     var cmd = {};
     cmd["cmd"]="add service";
@@ -50,18 +45,18 @@ function connect(address) {
     cmd["address"]=address;
     cmd["bind"]="0.0.0.0";
     cmd["port"]="8085";
-    var json = JSON.stringify(cmd);
-    CommandHandler.command(json);
+    query.query(cmd);
+}
+
+function install() {
+    query.query({cmd: "install"});
 }
 
 function listBT() {
-    var cmd = {};
-    cmd["cmd"]="get bluetooth devices";
-    var json = JSON.stringify(cmd);
-    CommandHandler.command(json);
+    query.query({cmd: "get bluetooth devices"}, function(obj) { displayBTDevs(obj); });
 }
 
-CommandHandler.command('ready');
+query.query({cmd: "ready", msg: "Hi!"});
 
         </script>
     </body>

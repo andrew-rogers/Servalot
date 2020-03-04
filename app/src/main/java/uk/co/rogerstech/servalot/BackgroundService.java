@@ -35,7 +35,6 @@ public class BackgroundService extends Service {
 
         // Start service manager
         serviceManager = new ServiceManager(getFilesDir(), new File(getFilesDir(),"services.tsv"));
-        CommandHandler.getInstance().registerServiceManager(serviceManager);
         serviceManager.registerNodeFactoryBuilder("sh", new ProcessNodeFactory.Builder(getFilesDir(), new File(getFilesDir(),"services")));
         serviceManager.registerNodeFactoryBuilder("rfcomm", new RfcommNodeFactory.Builder());
         serviceManager.load();
