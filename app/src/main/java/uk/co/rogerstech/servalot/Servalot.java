@@ -23,7 +23,11 @@ import java.io.File;
 
 public class Servalot {
 
+    private static Logger logger = null;
+
     public static void main(String[] args){
+
+        logger = new SystemLogger();
 
         // Set filesDir to ~/.servalot/files
         File filesDir = new File(System.getProperty("user.home"),".servalot");
@@ -48,6 +52,30 @@ public class Servalot {
             } catch(InterruptedException e) {
             }
         }
+    }
+
+    public static class SystemLogger extends Logger {
+
+        SystemLogger() {
+            instance = this;
+        }
+
+        public void error(final String str) {
+            log("E",str);
+        }
+
+        public void info(final String str) {
+            log("I",str);
+        }
+
+        public void toast(final String str) {
+            System.out.println(str);
+        }
+
+        private void log(final String type, final String str) {
+            System.out.println(type+": "+str);
+        }
+
     }
 }
 
