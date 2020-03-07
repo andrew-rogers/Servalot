@@ -26,6 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +69,16 @@ public class ServiceManager {
             // Don't need to do anything if not found
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        // Example WebSocket server
+        try {
+            WsServer s = new WsServer( 8800 );
+            s.setHttpHandler(new WsServer.DemoHandler());
+            s.start();
+        }
+        catch (UnknownHostException ex) {
+            Logger.getInstance().error("WsServer error on startup.");
         }
     }
 

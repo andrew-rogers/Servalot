@@ -126,8 +126,13 @@ public class WebViewHelper{
         }
 
         public void toast(final String str) {
-            Toast.makeText(activity.getApplicationContext(), str, Toast.LENGTH_LONG)
-             .show();
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(activity.getApplicationContext(), str, Toast.LENGTH_LONG)
+                         .show();
+                }
+            });
         }
 
         private void log(final String type, final String str) {
