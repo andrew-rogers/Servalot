@@ -29,14 +29,20 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.java_websocket.drafts.Draft;
+import org.java_websocket.drafts.Draft_6455;
+import org.java_websocket.enums.HandshakeState;
 import org.java_websocket.exceptions.InvalidDataException;
+import org.java_websocket.exceptions.InvalidHandshakeException;
+import org.java_websocket.framing.Framedata;
 import org.java_websocket.WebSocket;
 import org.java_websocket.WebSocketAdapter;
 import org.java_websocket.WebSocketImpl;
 import org.java_websocket.handshake.ClientHandshake;
+import org.java_websocket.handshake.Handshakedata;
 import org.java_websocket.handshake.HandshakeImpl1Server;
 import org.java_websocket.handshake.ServerHandshakeBuilder;
 import org.java_websocket.WebSocketServerFactory;
@@ -48,7 +54,8 @@ public class WsServer extends WebSocketServer {
     private WsHttpHandler httpHandler = null;
 
 	public WsServer( int port ) throws UnknownHostException {
-        super( new InetSocketAddress( port ) );
+        super( new InetSocketAddress( port ), new ArrayList<Draft>(Arrays.asList(new Draft_6455(), new Draft_HTTPD())) );
+        //super( new InetSocketAddress( port ), new ArrayList<Draft>(Arrays.asList(new Draft_HTTPD())) );
         logger = Logger.getInstance();
         setReuseAddr(true);
 	}
@@ -57,7 +64,6 @@ public class WsServer extends WebSocketServer {
 	public void onStart() {
         logger.info("WebSocket server started!");
 		setConnectionLostTimeout(60); // Check every minute.
-        setWebSocketFactory(new WsFactory());
         
 	}
 
@@ -73,8 +79,8 @@ public class WsServer extends WebSocketServer {
 
 	@Override
 	public void onOpen( WebSocket ws, ClientHandshake h ) {
-		ws.send("Hello!");
         logger.info("WS open");
+		ws.send("Hello!");
 	}
 
     @Override
@@ -91,100 +97,38 @@ public class WsServer extends WebSocketServer {
         httpHandler = handler;
     }
 
-    public class WsChannel implements ByteChannel {
+    static class Draft_HTTPD extends Draft_6455 {
 
-        private SocketChannel socketChannel;
-        final static int HEADER = 0;
-        final static int WS = 1;
-        private int state = HEADER;
-        private String header="";
-        private String[] headers = null;
+        private Logger logger = Logger.getInstance();
 
-        WsChannel( SocketChannel channel ) {
-            socketChannel = channel;
-        }
-
-        public void processHeaderData(byte[] data, int start, int end) {
-            // TODO this may be clearer with a byte-by-byte state machine
-            header += new String(data, start, end-start).replace("\r","");
-            if( header.contains("\n\n") ){ // Empty line signals end of headers
-                headers = header.split("[\\n]+");
-                int hl=headers.length;
-                for( int i=0; i<hl; i++) {
-                    String h=headers[i];
-                    if(h.startsWith("Upgrade:") && h.contains("websocket")) state=WS;
-                }
-            }
-        }
-
-        public int read(ByteBuffer dst) throws IOException {
-            int nr=0;
-            if( state == WS ) {
-                nr=socketChannel.read(dst);
-            }
-            else {
-                /* Even if it's not a websocket request, send to websocket handler
-                   code anyway. The 404 response is intercepted in write() */
-                int p0=dst.position();
-                nr=socketChannel.read(dst);
-                int p1=dst.position();
-                processHeaderData(dst.array(),p0,p1);
-            }
-            return nr;
-        }
-
-        public int write( ByteBuffer src ) throws IOException {
-            int nw=0;
-            if( state == WS ) {
-                nw=socketChannel.write(src);
-            }
-            else {
-                // Intercept 404 response and generate our HTTP response
-
-                // Pretend to write the data by getting it from the ByteBuffer.
-                nw=src.limit()-src.position();
-                while( src.position() < src.limit() ) src.get();
-
-                // Create our own ByteBuffer with a web page.
-                byte[] rb=httpHandler.handle(headers).getBytes();
-                ByteBuffer buf=ByteBuffer.allocate(rb.length);
-                buf.put(rb);
-                buf.flip();
-                socketChannel.write(buf);
-                
-            }
-            return nw;
-        }
-
-        public void close() throws IOException {
-            socketChannel.close();
-        }
-
-        public boolean isOpen() {
-            return socketChannel.isOpen();
-        }
-
-    }
-
-    public class WsFactory implements WebSocketServerFactory {
-
-        @Override
-        public WebSocketImpl createWebSocket( WebSocketAdapter a, Draft d) {
-            return new WebSocketImpl( a, d );
+        Draft_HTTPD() {
+            super();
         }
 
         @Override
-        public WebSocketImpl createWebSocket( WebSocketAdapter a, List<Draft> d) {
-            return new WebSocketImpl( a, d );
+        public Draft copyInstance() {
+                return new Draft_HTTPD();
         }
 
         @Override
-        public ByteChannel wrapChannel( SocketChannel channel, SelectionKey key ) {
-            return new WsChannel(channel);
+        public HandshakeState acceptHandshakeAsServer( ClientHandshake handshakedata ) throws InvalidHandshakeException {
+            return HandshakeState.MATCHED;
         }
 
         @Override
-        public void close() {
+        public List<ByteBuffer> createHandshake( Handshakedata handshakedata, boolean withcontent ) {
+            ArrayList<ByteBuffer> ret=new ArrayList<ByteBuffer>();
+            byte[] resp=new HttpResponse("<html><head></head><body><h1>Hello world!</h1></body></html>").getBytes();
+            ByteBuffer bb=ByteBuffer.allocate(resp.length);
+            bb.put(resp);
+            bb.flip();
+            ret.add(bb);
+            return ret;
+        }
+
+        @Override
+        public ByteBuffer createBinaryFrame( Framedata framedata ) {
+            return ByteBuffer.allocate(0);
         }
 
     }
