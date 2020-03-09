@@ -19,43 +19,33 @@
 
 package uk.co.rogerstech.servalot;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ByteChannel;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.java_websocket.drafts.Draft;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.enums.HandshakeState;
-import org.java_websocket.exceptions.InvalidDataException;
 import org.java_websocket.exceptions.InvalidHandshakeException;
-import org.java_websocket.framing.Framedata;
 import org.java_websocket.WebSocket;
 import org.java_websocket.WebSocketAdapter;
-import org.java_websocket.WebSocketImpl;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.handshake.Handshakedata;
-import org.java_websocket.handshake.HandshakeImpl1Server;
-import org.java_websocket.handshake.ServerHandshakeBuilder;
-import org.java_websocket.WebSocketServerFactory;
 import org.java_websocket.server.WebSocketServer;
 
 public class WsServer extends WebSocketServer {
 
     private Logger logger = null;
     private WsHttpHandler httpHandler = null;
+    private static Draft_HTTPD draftHTTPD = new Draft_HTTPD();
 
 	public WsServer( int port ) throws UnknownHostException {
-        super( new InetSocketAddress( port ), new ArrayList<Draft>(Arrays.asList(new Draft_6455(), new Draft_HTTPD())) );
-        //super( new InetSocketAddress( port ), new ArrayList<Draft>(Arrays.asList(new Draft_HTTPD())) );
+        super( new InetSocketAddress( port ), new ArrayList<Draft>(Arrays.asList(new Draft_6455(), draftHTTPD)) );
         logger = Logger.getInstance();
         setReuseAddr(true);
 	}
@@ -64,13 +54,7 @@ public class WsServer extends WebSocketServer {
 	public void onStart() {
         logger.info("WebSocket server started!");
 		setConnectionLostTimeout(60); // Check every minute.
-        
 	}
-
-    @Override
-    public ServerHandshakeBuilder onWebsocketHandshakeReceivedAsServer( WebSocket conn, Draft draft, ClientHandshake request ) throws InvalidDataException {
-       return new HandshakeImpl1Server();
-    }
 
     @Override
 	public void onError( WebSocket ws, Exception ex ) {
@@ -79,8 +63,14 @@ public class WsServer extends WebSocketServer {
 
 	@Override
 	public void onOpen( WebSocket ws, ClientHandshake h ) {
-        logger.info("WS open");
-		ws.send("Hello!");
+        if( h.getFieldValue("Upgrade").equals("websocket") ) {
+            logger.info("WS open ");
+            ws.send("Hello!");
+        }
+        else {
+            // HTML sent as handshake acknowledgement in Draft_HTTPD
+            ws.close();
+        }
 	}
 
     @Override
@@ -95,30 +85,46 @@ public class WsServer extends WebSocketServer {
 
     public void setHttpHandler(WsHttpHandler handler) {
         httpHandler = handler;
+        draftHTTPD.setHttpHandler(handler);
     }
 
     static class Draft_HTTPD extends Draft_6455 {
 
         private Logger logger = Logger.getInstance();
+        private String resourceDescriptor = "/";
+        private WsHttpHandler httpHandler = null;
 
         Draft_HTTPD() {
             super();
         }
 
+        Draft_HTTPD(WsHttpHandler h) {
+            super();
+            httpHandler = h;
+        }
+
         @Override
         public Draft copyInstance() {
-                return new Draft_HTTPD();
+                // New Draft instance for each socket.
+                return new Draft_HTTPD(httpHandler);
+        }
+
+        public void setHttpHandler(WsHttpHandler handler) {
+            httpHandler = handler;
         }
 
         @Override
         public HandshakeState acceptHandshakeAsServer( ClientHandshake handshakedata ) throws InvalidHandshakeException {
+            resourceDescriptor = handshakedata.getResourceDescriptor();
             return HandshakeState.MATCHED;
         }
 
         @Override
         public List<ByteBuffer> createHandshake( Handshakedata handshakedata, boolean withcontent ) {
+            logger.info("Getting "+resourceDescriptor);
+            //dumpHeaderFields(handshakedata);
             ArrayList<ByteBuffer> ret=new ArrayList<ByteBuffer>();
-            byte[] resp=new HttpResponse("<html><head></head><body><h1>Hello world!</h1></body></html>").getBytes();
+            byte[] resp = httpHandler.handle(null).getBytes();
             ByteBuffer bb=ByteBuffer.allocate(resp.length);
             bb.put(resp);
             bb.flip();
@@ -126,9 +132,12 @@ public class WsServer extends WebSocketServer {
             return ret;
         }
 
-        @Override
-        public ByteBuffer createBinaryFrame( Framedata framedata ) {
-            return ByteBuffer.allocate(0);
+        public void dumpHeaderFields(Handshakedata h) {
+            Iterator<String> it=h.iterateHttpFields();
+            while(it.hasNext()) {
+                String field = it.next();
+                logger.info("" + field + " : " + h.getFieldValue(field));
+            }
         }
 
     }
@@ -156,7 +165,7 @@ public class WsServer extends WebSocketServer {
             bb.put(response);
             return bb.array();
         }
-        
+
     }
 
     interface WsHttpHandler {
