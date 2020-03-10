@@ -32,6 +32,7 @@ import org.java_websocket.drafts.Draft;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.enums.HandshakeState;
 import org.java_websocket.exceptions.InvalidHandshakeException;
+import org.java_websocket.framing.Framedata;
 import org.java_websocket.WebSocket;
 import org.java_websocket.WebSocketAdapter;
 import org.java_websocket.handshake.ClientHandshake;
@@ -42,10 +43,9 @@ public class WsServer extends WebSocketServer {
 
     private Logger logger = null;
     private WsHttpHandler httpHandler = null;
-    private static Draft_HTTPD draftHTTPD = new Draft_HTTPD();
 
 	public WsServer( int port ) throws UnknownHostException {
-        super( new InetSocketAddress( port ), new ArrayList<Draft>(Arrays.asList(new Draft_6455(), draftHTTPD)) );
+        super( new InetSocketAddress( port ), new ArrayList<Draft>(Arrays.asList(new Draft_6455(), new Draft_HTTPD())) );
         logger = Logger.getInstance();
         setReuseAddr(true);
 	}
@@ -63,12 +63,14 @@ public class WsServer extends WebSocketServer {
 
 	@Override
 	public void onOpen( WebSocket ws, ClientHandshake h ) {
+        //dumpHeaderFields(h);
         if( h.getFieldValue("Upgrade").equals("websocket") ) {
             logger.info("WS open ");
             ws.send("Hello!");
         }
         else {
-            // HTML sent as handshake acknowledgement in Draft_HTTPD
+            // Send the HTML and close
+            ws.send(httpHandler.handle(null).getBytes());
             ws.close();
         }
 	}
@@ -85,59 +87,49 @@ public class WsServer extends WebSocketServer {
 
     public void setHttpHandler(WsHttpHandler handler) {
         httpHandler = handler;
-        draftHTTPD.setHttpHandler(handler);
+    }
+
+    public void dumpHeaderFields(Handshakedata h) {
+        Iterator<String> it=h.iterateHttpFields();
+        while(it.hasNext()) {
+            String field = it.next();
+            logger.info("" + field + " : " + h.getFieldValue(field));
+        }
     }
 
     static class Draft_HTTPD extends Draft_6455 {
 
         private Logger logger = Logger.getInstance();
-        private String resourceDescriptor = "/";
-        private WsHttpHandler httpHandler = null;
 
         Draft_HTTPD() {
             super();
         }
 
-        Draft_HTTPD(WsHttpHandler h) {
-            super();
-            httpHandler = h;
-        }
-
         @Override
         public Draft copyInstance() {
                 // New Draft instance for each socket.
-                return new Draft_HTTPD(httpHandler);
-        }
-
-        public void setHttpHandler(WsHttpHandler handler) {
-            httpHandler = handler;
+                return new Draft_HTTPD();
         }
 
         @Override
         public HandshakeState acceptHandshakeAsServer( ClientHandshake handshakedata ) throws InvalidHandshakeException {
-            resourceDescriptor = handshakedata.getResourceDescriptor();
             return HandshakeState.MATCHED;
         }
 
         @Override
         public List<ByteBuffer> createHandshake( Handshakedata handshakedata, boolean withcontent ) {
-            logger.info("Getting "+resourceDescriptor);
-            //dumpHeaderFields(handshakedata);
+            // Return empty list
             ArrayList<ByteBuffer> ret=new ArrayList<ByteBuffer>();
-            byte[] resp = httpHandler.handle(null).getBytes();
-            ByteBuffer bb=ByteBuffer.allocate(resp.length);
-            bb.put(resp);
-            bb.flip();
-            ret.add(bb);
             return ret;
         }
 
-        public void dumpHeaderFields(Handshakedata h) {
-            Iterator<String> it=h.iterateHttpFields();
-            while(it.hasNext()) {
-                String field = it.next();
-                logger.info("" + field + " : " + h.getFieldValue(field));
-            }
+        @Override
+        public ByteBuffer createBinaryFrame( Framedata framedata ) {
+            byte[] data=framedata.getPayloadData().array();
+
+            // Ignore short control frames, only send the HTTP response.
+            if(data.length>20) return ByteBuffer.wrap(data); // TODO check frame bits instead of length.
+            return ByteBuffer.allocate(0);
         }
 
     }
