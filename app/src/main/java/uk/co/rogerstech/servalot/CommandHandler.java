@@ -21,6 +21,8 @@ package uk.co.rogerstech.servalot;
 
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Vector;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -79,6 +81,20 @@ public class CommandHandler {
             String ret = null;
             try {
                 ret = obj_cmd.getString(key);
+            }
+            catch(JSONException e) {
+                ret = null;
+            }
+            return ret;
+        }
+
+        public List<String> getStringList(final String key) {
+            Vector<String> ret = new Vector<String>();
+            try {
+                JSONArray arr = obj_cmd.getJSONArray(key);
+                for( int i=0; i<arr.length(); i++) {
+                    ret.add(arr.getString(i));
+                }
             }
             catch(JSONException e) {
                 ret = null;

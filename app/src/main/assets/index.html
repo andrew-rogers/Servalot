@@ -7,6 +7,7 @@
     <body>
         <input type="button" value="Install package..." onClick="install()" />
         <input type="button" value="List Bluetooth devices" onClick="listBT()" />
+        <input type="button" value="ls" onClick="ls()" />
         <div id="div_controls"></div>
         <textarea id="ta_log" rows=20></textarea>
         <script type="text/javascript">
@@ -30,6 +31,10 @@ div_controls.appendChild(rf.div);
 
 function listBT() {
     rf.show();
+}
+
+function ls() {
+    query.query({cmd: "exec", args: ["sh", "-c", "ls"]});
 }
 
 query.query({cmd: "ready", msg: "Hi!"});
