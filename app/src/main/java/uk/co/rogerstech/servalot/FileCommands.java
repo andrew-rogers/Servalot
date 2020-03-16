@@ -20,6 +20,7 @@
 package uk.co.rogerstech.servalot;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -42,7 +43,8 @@ public class FileCommands {
         CommandHandler.getInstance().registerCommand(new CommandExec());
     }
 
-    public String exec(List<String> cmd) {
+    // Returns base64 encoded stdout as a String.
+    public String exec(List<String> cmd, String b64_stdin) {
         StringBuffer output = new StringBuffer();
         try {
             // Execute the command.
@@ -53,6 +55,20 @@ public class FileCommands {
             env.put("PATH", path);
             processBuilder.directory(root_dir);
             Process process = processBuilder.start();
+
+            // Write the stdin.
+            if( b64_stdin != null) {
+                ByteArrayInputStream bis = new ByteArrayInputStream(b64_stdin.getBytes());
+                Base64.OutputStream b64os = new Base64.OutputStream(process.getOutputStream(), Base64.NO_OPTIONS);
+
+                int nread;
+                byte[] buffer = new byte[4096];
+
+                while ((nread = bis.read(buffer)) > 0) {
+                    b64os.write(buffer, 0, nread);
+                }
+                b64os.close();
+            }
 
             // Read stdout.
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -73,7 +89,7 @@ public class FileCommands {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return output.toString();
+        return Base64.encodeBytes(output.toString().getBytes());
     }
 
     public class CommandExec extends CommandHandler.Command {
@@ -83,8 +99,8 @@ public class FileCommands {
         }
 
         public void onExecute(CommandHandler.CommandArgs args) {
-            String output = exec(args.getStringList("args"));
-            args.put("stdout", Base64.encodeBytes(output.getBytes()));
+            String output = exec(args.getStringList("args"), args.getString("stdin"));
+            args.put("stdout", output);
             args.respond();
         }
     }

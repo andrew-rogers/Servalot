@@ -8,6 +8,8 @@
         <input type="button" value="Install package..." onClick="install()" />
         <input type="button" value="List Bluetooth devices" onClick="listBT()" />
         <input type="button" value="ls" onClick="ls()" />
+        <input type="button" value="Write file" onClick="writeFile()" />
+        <input type="button" value="Read file" onClick="readFile()" />
         <div id="div_controls"></div>
         <textarea id="ta_log" rows=20></textarea>
         <script type="text/javascript">
@@ -35,6 +37,15 @@ function listBT() {
 
 function ls() {
     query.query({cmd: "exec", args: ["sh", "-c", "ls"]});
+}
+
+function writeFile() {
+    let str=btoa("Just a line of text\n or two\nthree!");
+    query.query({cmd: "exec", args: ["sh", "-c", "cat > blah.txt"], stdin: str});
+}
+
+function readFile() {
+    query.query({cmd: "exec", args: ["sh", "-c", "cat blah.txt"]});
 }
 
 query.query({cmd: "ready", msg: "Hi!"});
