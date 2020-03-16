@@ -19,11 +19,16 @@
 
 package uk.co.rogerstech.servalot;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +46,7 @@ public class FileCommands {
         this.logger = Logger.getInstance();
         this.root_dir=root_dir;
         CommandHandler.getInstance().registerCommand(new CommandExec());
+        CommandHandler.getInstance().registerCommand(new CommandHttpGet());
     }
 
     // Returns base64 encoded stdout as a String.
@@ -92,6 +98,25 @@ public class FileCommands {
         return Base64.encodeBytes(output.toString().getBytes());
     }
 
+    public void httpGet(final String url, final String filename) {
+        try {
+            URL u = new URL(url);
+            InputStream is = u.openStream();
+            DataInputStream dis = new DataInputStream(new BufferedInputStream(is));
+            FileOutputStream fos = new FileOutputStream(new File(root_dir, filename));
+            byte[] buf = new byte[4096];
+            int cnt;
+            while ((cnt = dis.read(buf)) > 0) {
+                fos.write(buf, 0, cnt);
+            }
+            fos.close();
+            is.close();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public class CommandExec extends CommandHandler.Command {
 
         CommandExec() {
@@ -101,6 +126,18 @@ public class FileCommands {
         public void onExecute(CommandHandler.CommandArgs args) {
             String output = exec(args.getStringList("args"), args.getString("stdin"));
             args.put("stdout", output);
+            args.respond();
+        }
+    }
+
+    public class CommandHttpGet extends CommandHandler.Command {
+
+        CommandHttpGet() {
+            setName("httpget");
+        }
+
+        public void onExecute(CommandHandler.CommandArgs args) {
+            httpGet(args.getString("url"), args.getString("filename"));
             args.respond();
         }
     }

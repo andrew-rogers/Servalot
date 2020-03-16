@@ -53,7 +53,7 @@ public class CommandHandler {
             String str_cmd = obj.getString("cmd");
             Command cmd = commands.get(str_cmd);
             if (cmd!=null) cmd.execute(obj, l);
-            else logger.error("Unknown command: "+cmd);
+            else logger.error("Unknown command: "+str_cmd);
         }
         catch(JSONException e) {
             // TODO
