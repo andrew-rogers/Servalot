@@ -35,6 +35,8 @@ public class Servalot {
 
         System.out.println("Files Directory: "+filesDir.getAbsolutePath());
 
+        new FileCommands(filesDir);
+
         // Start service manager
         ServiceManager serviceManager = new ServiceManager(filesDir, new File(filesDir,"services.tsv"));
         serviceManager.registerNodeFactoryBuilder("sh", new ProcessNodeFactory.Builder(filesDir, new File(filesDir,"services")));

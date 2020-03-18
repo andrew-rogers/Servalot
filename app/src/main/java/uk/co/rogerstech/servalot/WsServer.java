@@ -40,15 +40,20 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.handshake.Handshakedata;
 import org.java_websocket.server.WebSocketServer;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class WsServer extends WebSocketServer {
 
     private Logger logger = null;
     private WsHttpHandler httpHandler = null;
+    private WsServerCommandResponseListener crl = null;
 
 	public WsServer( int port ) throws UnknownHostException {
         super( new InetSocketAddress( port ), new ArrayList<Draft>(Arrays.asList(new Draft_6455(), new Draft_HTTPD())) );
         logger = Logger.getInstance();
         setReuseAddr(true);
+        crl = new WsServerCommandResponseListener();
 	}
 
 	@Override
@@ -84,6 +89,17 @@ public class WsServer extends WebSocketServer {
 	@Override
 	public void onMessage( WebSocket ws, String message ) {
 		logger.info( "WS msg: " + message );
+        broadcast( message );
+        try {
+            JSONObject obj = new JSONObject(message);
+            String cmd = obj.getString("cmd");
+            if( cmd != null ) {
+                CommandHandler.getInstance().command(obj, crl);
+            }
+        }
+        catch(JSONException e) {
+            // TODO
+        }
 	}
 
     public void setHttpHandler(WsHttpHandler handler) {
@@ -165,12 +181,36 @@ public class WsServer extends WebSocketServer {
         public HttpResponse handle(final String[] headers);
     }
 
-    // TODO adapt this to send the websocket client to the browser
     static class DemoHandler implements WsHttpHandler {
 
         @Override
         public HttpResponse handle(final String[] headers) {
-            return new HttpResponse("<html><head></head><body><h1>Hello world!</h1></body></html>");
+            // The HTML and JavaScript for the WebSocket client
+            // TODO: move this to files/www/index.html
+            String js = "";
+            js += "var hostname = window.location.hostname;\n";
+            js += "var ws = new WebSocket(\"ws://\" + hostname + \":8800\");\n\n";
+            js += "function evalJsCmd(js_file) {\n";
+            js += "    ws.send(\"{cmd: \\\"exec\\\", args: [\\\"sh\\\", \\\"-c\\\", \\\"cat \" + js_file + \"\\\"]}\");\n";
+            js += "}\n\n";
+            js += "ws.onmessage = function (e) {\n";
+            js += "    console.log('Server: ' + e.data);\n";
+            js += "    var obj = JSON.parse(e.data);\n";
+            js += "    eval(atob(obj.stdout));\n";
+            js += "};\n\n";
+
+            String html = "<!DOCTYPE html><html><head>\n";
+            html += "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" charset=\"UTF-8\">";
+            html += "  <script type=\"text/javascript\">\n" + js + "\n</script>\n</head><body>";
+            html += "<div id=\"div_buttons\"><input type=\"button\" value=\"Eval main.js\" onClick=\"evalJsCmd('main.js')\" /></div>";
+            html += "</h1></body></html>";
+            return new HttpResponse(html);
+        }
+    }
+
+    public class WsServerCommandResponseListener extends CommandHandler.ResponseListener {
+        public void onResponse(final JSONObject obj) {
+            broadcast(obj.toString());
         }
     }
 
