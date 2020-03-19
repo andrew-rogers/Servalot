@@ -19,6 +19,9 @@
 
 package uk.co.rogerstech.servalot;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -51,7 +54,7 @@ public class WsServer extends WebSocketServer {
 
 	public WsServer( int port ) throws UnknownHostException {
         super( new InetSocketAddress( port ), new ArrayList<Draft>(Arrays.asList(new Draft_6455(), new Draft_HTTPD())) );
-        logger = Logger.getInstance();
+    logger = Logger.getInstance();
         setReuseAddr(true);
         crl = new WsServerCommandResponseListener();
 	}
@@ -182,28 +185,28 @@ public class WsServer extends WebSocketServer {
     }
 
     static class DemoHandler implements WsHttpHandler {
+        File root_dir = null;
+
+        DemoHandler( File root_dir ) {
+            this.root_dir = root_dir;
+        }
 
         @Override
         public HttpResponse handle(final String[] headers) {
-            // The HTML and JavaScript for the WebSocket client
-            // TODO: move this to files/www/index.html
-            String js = "";
-            js += "var hostname = window.location.hostname;\n";
-            js += "var ws = new WebSocket(\"ws://\" + hostname + \":8800\");\n\n";
-            js += "function evalJsCmd(js_file) {\n";
-            js += "    ws.send(\"{cmd: \\\"exec\\\", args: [\\\"sh\\\", \\\"-c\\\", \\\"cat \" + js_file + \"\\\"]}\");\n";
-            js += "}\n\n";
-            js += "ws.onmessage = function (e) {\n";
-            js += "    console.log('Server: ' + e.data);\n";
-            js += "    var obj = JSON.parse(e.data);\n";
-            js += "    eval(atob(obj.stdout));\n";
-            js += "};\n\n";
 
-            String html = "<!DOCTYPE html><html><head>\n";
-            html += "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" charset=\"UTF-8\">";
-            html += "  <script type=\"text/javascript\">\n" + js + "\n</script>\n</head><body>";
-            html += "<div id=\"div_buttons\"><input type=\"button\" value=\"Eval main.js\" onClick=\"evalJsCmd('main.js')\" /></div>";
-            html += "</h1></body></html>";
+            // The HTML and JavaScript for the WebSocket client
+            String html = "";
+
+            try {
+                html = FileCommands.readString(new File(root_dir, "www/index.html"));
+            }
+            catch (FileNotFoundException e) {
+                // TODO: send 404.
+            }
+            catch (IOException e) {
+                // TODO: send internal server error
+            }
+
             return new HttpResponse(html);
         }
     }

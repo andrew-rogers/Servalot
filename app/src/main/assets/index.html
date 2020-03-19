@@ -7,12 +7,16 @@
         <script src="RfcommControls.js"></script>
     </head>
     <body>
-        <input type="button" value="Install package..." onClick="install()" />
-        <input type="button" value="List Bluetooth devices" onClick="listBT()" />
-        <input type="button" value="Eval main.js" onClick="evalJsCmd('main.js')" />
-        <input type="button" value="Get" onClick="httpget('https://github.com/andrew-rogers/andrew-rogers.github.io/raw/master/Servalot/Packages/HTTPDemo.zip', 'thing.zip')" />
-        <input type="button" value="Read file" onClick="readFile()" />
-        <div><textarea id="ta_cmd" rows=1></textarea><input type="button" value="Run" onClick="execCmd()" /></div>
+        <div id="div_buttons">
+            <input type="button" value="Install package..." onClick="install()" />
+            <input type="button" value="List Bluetooth devices" onClick="listBT()" />
+            <input type="button" value="Eval main.js" onClick="evalJsCmd('www/main.js')" />
+            <input type="button" value="Get" onClick="httpget('https://github.com/andrew-rogers/andrew-rogers.github.io/raw/master/Servalot/Packages/HTTPDemo.zip', 'thing.zip')" />
+        </div>
+        <div id="div_run">
+            <textarea id="ta_cmd" rows=1></textarea>
+            <input type="button" value="Run" onClick="execCmd()" />
+        </div>
         <div id="div_controls"></div>
         <textarea id="ta_log" rows=20></textarea>
         <script type="text/javascript">
@@ -47,15 +51,6 @@ function evalJs(obj) {
 
 function evalJsCmd(js_file) {
     query.query({cmd: "exec", args: ["sh", "-c", "cat "+js_file]},evalJs);
-}
-
-function writeFile() {
-    let str=btoa("Just a line of text\n or two\nthree!");
-    query.query({cmd: "exec", args: ["sh", "-c", "cat > blah.txt"], stdin: str});
-}
-
-function readFile() {
-    query.query({cmd: "exec", args: ["sh", "-c", "cat blah.txt"]});
 }
 
 function cmdResponse(obj) {

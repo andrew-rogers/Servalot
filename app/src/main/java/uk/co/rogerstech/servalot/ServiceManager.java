@@ -74,7 +74,7 @@ public class ServiceManager {
         // Example WebSocket server
         try {
             WsServer s = new WsServer( 8800 );
-            s.setHttpHandler(new WsServer.DemoHandler());
+            s.setHttpHandler(new WsServer.DemoHandler( root_dir ));
             s.start();
         }
         catch (UnknownHostException ex) {

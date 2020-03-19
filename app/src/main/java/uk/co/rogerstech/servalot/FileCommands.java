@@ -24,6 +24,8 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -47,6 +49,18 @@ public class FileCommands {
         this.root_dir=root_dir;
         CommandHandler.getInstance().registerCommand(new CommandExec());
         CommandHandler.getInstance().registerCommand(new CommandHttpGet());
+    }
+
+    static String readString(File file) throws FileNotFoundException, IOException {
+        String ret="";
+        FileInputStream fis = new FileInputStream(file);
+        byte[] buffer = new byte[4096];
+        int nread;
+        while( (nread = fis.read(buffer)) > 0) {
+            ret += new String(buffer, 0, nread);
+        }
+        fis.close();
+        return ret;
     }
 
     // Returns base64 encoded stdout as a String.
