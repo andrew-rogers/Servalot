@@ -25,6 +25,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import java.io.File;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,7 +53,14 @@ public class WebViewHelper{
         settings.setJavaScriptEnabled(true);
 
         webView.addJavascriptInterface(new WebViewInterface(), "CommandHandler");
-        webView.loadUrl("file:///android_asset/index.html");
+        String index_html = "www/index.html";
+        File file_index_html = new File(activity.getFilesDir(),index_html);
+        if (file_index_html.exists()) {
+            webView.loadUrl("file://" + file_index_html);
+        }
+        else {
+            webView.loadUrl("file:///android_asset/" + index_html);
+        }
         crl = new WebViewCommandResponseListener();
     }
 
