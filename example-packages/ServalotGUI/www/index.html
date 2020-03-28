@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8">
+        <script src="Query.js"></script>
+        <script src="QueryWs.js"></script>
+        <script src="ConfigButton.js"></script>
+        <script src="RfcommControls.js"></script>
+    </head>
+    <body>
+        <div id="div_buttons">
+            <input type="button" value="Install package..." onClick="install()" />
+            <input type="button" value="List Bluetooth devices" onClick="listBT()" />
+            <input type="button" value="Eval main.js" onClick="evalJsCmd('www/main.js')" />
+            <input type="button" value="Get" onClick="httpget('https://github.com/andrew-rogers/andrew-rogers.github.io/raw/master/Servalot/Packages/HTTPDemo.zip', 'thing.zip')" />
+        </div>
+        <div id="div_run">
+            <textarea id="ta_cmd" rows=1></textarea>
+            <input type="button" value="Run" onClick="execCmd()" />
+        </div>
+        <div id="div_controls"></div>
+        <textarea id="ta_log" rows=20></textarea>
+        <script type="text/javascript">
+
+var div_controls = document.getElementById("div_controls");
+var ta = document.getElementById("ta_log");
+var ta_cmd = document.getElementById("ta_cmd");
+ta.style.width="100%";
+ta_cmd.style.width="80%";
+
+function log(str) {
+    ta.value = ta.value + str + "\n";
+}
+
+var query = null;
+
+if (typeof CommandHandler !== "undefined") {
+    query = new Query();
+}
+else {
+    var hostname = window.location.hostname;
+    var ws = new WebSocket("ws://" + hostname + ":8800");
+    query = new QueryWs(ws);
+}
+
+function install() {
+    query.query({cmd: "install"});
+}
+
+let rf = new RfcommControls(function(obj, callback) {query.query(obj, callback);});
+div_controls.appendChild(rf.div);
+
+function listBT() {
+    rf.show();
+}
+
+function evalJs(obj) {
+    let script=atob(obj.stdout);
+    eval(script);
+}
+
+function evalJsCmd(js_file) {
+    query.query({cmd: "exec", args: ["sh", "-c", "cat "+js_file]},evalJs);
+}
+
+function cmdResponse(obj) {
+    log(atob(obj.stdout));
+}
+
+function execCmd() {
+    query.query({cmd: "exec", args: ["sh", "-c", ta_cmd.value]}, cmdResponse);
+}
+
+function httpget(url, filename) {
+    query.query({cmd: "httpget", url: url, filename: filename});
+}
+
+evalJsCmd("main.js");
+query.query({cmd: "ready", msg: "Hi!"});
+
+        </script>
+    </body>
+</html>
+

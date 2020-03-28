@@ -79,7 +79,7 @@ public class WsServer extends WebSocketServer {
         }
         else {
             // Send the HTML and close
-            ws.send(httpHandler.handle(null).getBytes());
+            ws.send(httpHandler.handle(h.getResourceDescriptor(), null).getBytes());
             ws.close();
         }
 	}
@@ -92,10 +92,10 @@ public class WsServer extends WebSocketServer {
 	@Override
 	public void onMessage( WebSocket ws, String message ) {
 		logger.info( "WS msg: " + message );
-        broadcast( message );
+        String cmd = null;
         try {
             JSONObject obj = new JSONObject(message);
-            String cmd = obj.getString("cmd");
+            cmd = obj.getString("cmd");
             if( cmd != null ) {
                 CommandHandler.getInstance().command(obj, crl);
             }
@@ -103,6 +103,9 @@ public class WsServer extends WebSocketServer {
         catch(JSONException e) {
             // TODO
         }
+
+        // Only broadcast if the message in not a command.
+        if (cmd==null) broadcast( message );
 	}
 
     public void setHttpHandler(WsHttpHandler handler) {
@@ -181,7 +184,7 @@ public class WsServer extends WebSocketServer {
     }
 
     interface WsHttpHandler {
-        public HttpResponse handle(final String[] headers);
+        public HttpResponse handle(final String resource, final String[] headers);
     }
 
     static class DemoHandler implements WsHttpHandler {
@@ -192,13 +195,17 @@ public class WsServer extends WebSocketServer {
         }
 
         @Override
-        public HttpResponse handle(final String[] headers) {
+        public HttpResponse handle(final String resource, final String[] headers) {
 
             // The HTML and JavaScript for the WebSocket client
             String html = "";
 
+            String loc = resource;
+            if (loc.equals("/")) loc = "/index.html";
+            loc = "www/" + loc;
+
             try {
-                html = FileCommands.readString(new File(root_dir, "www/index.html"));
+                html = FileCommands.readString(new File(root_dir, loc));
             }
             catch (FileNotFoundException e) {
                 // TODO: send 404.

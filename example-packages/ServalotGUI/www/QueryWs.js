@@ -25,15 +25,16 @@
  *
  */
 
-var Query = function() {
+var QueryWs = function(ws) {
+    this.ws = ws;
     this.pending = {};
-    if (CommandHandler !== undefined) {
-        that = this;
-        CommandHandler.response = function(json) { if(log)log("R:"+json); that.response(JSON.parse(json)); };
-    }
+    that = this;
+    ws.onmessage = function (e) {
+        that.response(JSON.parse(e.data));
+    };
 };
 
-Query.prototype.query = function(obj, callback) {
+QueryWs.prototype.query = function(obj, callback) {
 
     if( callback !== undefined ) {
         // Find smallest number not already pending
@@ -45,10 +46,10 @@ Query.prototype.query = function(obj, callback) {
         obj.cb_num = ""+n;
     }
 
-    CommandHandler.command(JSON.stringify(obj)); 
+    this.ws.send(JSON.stringify(obj)); 
 };
 
-Query.prototype.response = function(obj) {
+QueryWs.prototype.response = function(obj) {
     let n=obj.cb_num;
     if( n !== undefined ) {
         let cb=this.pending[n];
