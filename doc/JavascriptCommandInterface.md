@@ -10,5 +10,5 @@ The use of JSON allows the use of the [Android WebView](https://developer.androi
 
 ## HTML GUI and Servalot back-end interaction
 
-![alternative text](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/andrew-rogers/Servalot/master/doc/html_gui_cmd_sd.puml&v=2)
+![alternative text](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/andrew-rogers/Servalot/master/doc/html_gui_cmd_sd.puml&v=3)
 

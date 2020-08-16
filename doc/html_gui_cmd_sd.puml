@@ -32,7 +32,7 @@ else Browser and WebSocket server
   Servalot -> WsServer : MESSAGE json
   WsServer -> WsServer: obj = new JSONObject(json);
   WsServer -> handler: command(obj, crl)
-  handler -> WsServer: crl.response(obj)
+  handler -> WsServer: crl.sendResponse(obj)
   WsServer -> WsServer: json = obj.toString();
   WsServer -> Servalot: MESSAGE json
 end
