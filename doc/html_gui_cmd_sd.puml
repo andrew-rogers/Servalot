@@ -3,39 +3,40 @@ hide footbox
 
 box "Browser or WebView GUI" #LightBlue
   participant "GUI in HTML/JavaScript" as gui
-  participant JsonQuery
+  participant Servalot
 end box
 
-box "Servalot configuration back-end" #FAA
-  participant HTTPD
+box "Servalot back-end" #FAA
+  participant WebViewHelper
+  participant WsServer
   participant "JSON Command Handler" as handler
 end box
 
-opt Remote Config Enabled
-  MainActivity -> HTTPD: registerCommandHandler()
-  note left: If handler is registered\nHTTPD starts up to\n allow remote config.
-end
-
 opt Android Webview
-  MainActivity -> JsonQuery: registerCommandHandler()
-  note left: If handler is registered\nJsonQuery knows it's in\nAndroid Webview context.
+  WebViewHelper -> WebViewHelper: wv.addJavascriptInterface(,"wvi")
+  note left: If "wvi" object exists in Javascript\nGUI knows it's in\nAndroid Webview context.
 end
 
-gui -> JsonQuery: registerResponseCallback(responseHandler)
-gui -> JsonQuery: query(Obj)
-JsonQuery -> JsonQuery: JSON.stringify(Obj)
+gui -> Servalot: command(obj, callback)
+Servalot -> Servalot: JSON.stringify(obj)
 
 alt Android WebView
-  JsonQuery -> handler: command(Json)
-  handler -> JsonQuery: response(Json)
-else Browser and simple HTTPD
-  JsonQuery -> JsonQuery: create XHR
-  JsonQuery -> HTTPD : POST Json
-  HTTPD -> handler: command(Json)
-  handler -> HTTPD: response(Json)
-  HTTPD -> JsonQuery: OK Json
+  Servalot -> WebViewHelper: wvi.command(json)
+  WebViewHelper -> WebViewHelper: obj = new JSONObject(json);
+  WebViewHelper -> handler: command(obj,crl)
+  handler -> WebViewHelper: crl.sendResponse(obj)
+  WebViewHelper -> WebViewHelper: json = obj.toString();
+  WebViewHelper -> Servalot: wvi.response(json)
+else Browser and WebSocket server
+  Servalot -> Servalot: create XHR
+  Servalot -> WsServer : MESSAGE json
+  WsServer -> WsServer: obj = new JSONObject(json);
+  WsServer -> handler: command(obj, crl)
+  handler -> WsServer: crl.response(obj)
+  WsServer -> WsServer: json = obj.toString();
+  WsServer -> Servalot: MESSAGE json
 end
 
-JsonQuery -> JsonQuery: JSON.parse(Json)
-JsonQuery -> gui: responseHandler(Obj)
+Servalot -> Servalot: JSON.parse(json)
+Servalot -> gui: callback(obj)
 @enduml

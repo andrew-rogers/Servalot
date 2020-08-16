@@ -52,7 +52,7 @@ public class WebViewHelper{
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
 
-        webView.addJavascriptInterface(new WebViewInterface(), "CommandHandler");
+        webView.addJavascriptInterface(new WebViewInterface(), "wvi");
         String index_html = "www/index.html";
         File file_index_html = new File(activity.getFilesDir(),index_html);
         if (file_index_html.exists()) {
@@ -74,7 +74,7 @@ public class WebViewHelper{
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                webView.evaluateJavascript("CommandHandler.response(\"" + str.replace("\"","\\\"") + "\");", null);
+                webView.evaluateJavascript("wvi.response(\"" + str.replace("\"","\\\"") + "\");", null);
             }
         });
     }

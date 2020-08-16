@@ -2,12 +2,12 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8">
-        <script src="Query.js"></script>
-        <script src="QueryWs.js"></script>
+        <script src="Servalot.js"></script>
         <script src="ConfigButton.js"></script>
         <script src="RfcommControls.js"></script>
     </head>
     <body>
+        <h1>ServalotGUI package</h1>
         <div id="div_buttons">
             <input type="button" value="Install package..." onClick="install()" />
             <input type="button" value="List Bluetooth devices" onClick="listBT()" />
@@ -32,22 +32,13 @@ function log(str) {
     ta.value = ta.value + str + "\n";
 }
 
-var query = null;
-
-if (typeof CommandHandler !== "undefined") {
-    query = new Query();
-}
-else {
-    var hostname = window.location.hostname;
-    var ws = new WebSocket("ws://" + hostname + ":8800");
-    query = new QueryWs(ws);
-}
+var servalot = new Servalot();
 
 function install() {
-    query.query({cmd: "install"});
+    servalot.command({cmd: "install"});
 }
 
-let rf = new RfcommControls(function(obj, callback) {query.query(obj, callback);});
+let rf = new RfcommControls(function(obj, callback) {servalot.command(obj, callback);});
 div_controls.appendChild(rf.div);
 
 function listBT() {
@@ -60,7 +51,7 @@ function evalJs(obj) {
 }
 
 function evalJsCmd(js_file) {
-    query.query({cmd: "exec", args: ["sh", "-c", "cat "+js_file]},evalJs);
+    servalot.command({cmd: "exec", args: ["sh", "-c", "cat "+js_file]},evalJs);
 }
 
 function cmdResponse(obj) {
@@ -68,15 +59,15 @@ function cmdResponse(obj) {
 }
 
 function execCmd() {
-    query.query({cmd: "exec", args: ["sh", "-c", ta_cmd.value]}, cmdResponse);
+    servalot.command({cmd: "exec", args: ["sh", "-c", ta_cmd.value]}, cmdResponse);
 }
 
 function httpget(url, filename) {
-    query.query({cmd: "httpget", url: url, filename: filename});
+    servalot.command({cmd: "httpget", url: url, filename: filename});
 }
 
 evalJsCmd("main.js");
-query.query({cmd: "ready", msg: "Hi!"});
+servalot.command({cmd: "ready", msg: "Hi!"});
 
         </script>
     </body>

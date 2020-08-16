@@ -27,9 +27,9 @@
 
 var Query = function() {
     this.pending = {};
-    if (CommandHandler !== undefined) {
+    if (wvi !== undefined) {
         that = this;
-        CommandHandler.response = function(json) { if(log)log("R:"+json); that.response(JSON.parse(json)); };
+        wvi.response = function(json) { if(log)log("R:"+json); that.response(JSON.parse(json)); };
     }
 };
 
@@ -45,7 +45,7 @@ Query.prototype.query = function(obj, callback) {
         obj.cb_num = ""+n;
     }
 
-    CommandHandler.command(JSON.stringify(obj)); 
+    wvi.command(JSON.stringify(obj));
 };
 
 Query.prototype.response = function(obj) {

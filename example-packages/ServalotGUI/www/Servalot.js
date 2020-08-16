@@ -24,17 +24,25 @@
  * for the JavaScript code in this page.
  *
  */
-
-var QueryWs = function(ws) {
-    this.ws = ws;
+ 
+var Servalot = function() {
     this.pending = {};
-    that = this;
-    ws.onmessage = function (e) {
-        that.response(JSON.parse(e.data));
-    };
+    if (typeof wvi !== 'undefined') {
+        that = this;
+        wvi.response = function(json) { if(log)log("R:"+json); that.response(JSON.parse(json)); };
+    }
+    else
+    {
+        var hostname = window.location.hostname;
+        this.ws = new WebSocket("ws://" + hostname + ":8800");
+        that = this;
+        this.ws.onmessage = function (e) {
+            that.response(JSON.parse(e.data));
+        };
+    }
 };
 
-QueryWs.prototype.query = function(obj, callback) {
+Servalot.prototype.command = function(obj, callback) {
 
     if( callback !== undefined ) {
         // Find smallest number not already pending
@@ -46,10 +54,16 @@ QueryWs.prototype.query = function(obj, callback) {
         obj.cb_num = ""+n;
     }
 
-    this.ws.send(JSON.stringify(obj)); 
+    if (typeof wvi !== 'undefined') {
+        wvi.command(JSON.stringify(obj));
+    }
+    else
+    {
+        this.ws.send(JSON.stringify(obj));
+    }
 };
 
-QueryWs.prototype.response = function(obj) {
+Servalot.prototype.response = function(obj) {
     let n=obj.cb_num;
     if( n !== undefined ) {
         let cb=this.pending[n];
