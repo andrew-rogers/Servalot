@@ -1,6 +1,6 @@
 /*
     Servalot - An inetd like multi-server
-    Copyright (C) 2020  Andrew Rogers
+    Copyright (C) 2020,2021  Andrew Rogers
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ public class TcpServer extends Thread {
     private NodeFactory peerFactory;
     private String address;
     private int port;
+    private ServerSocket serverSocket;
 
     TcpServer(NodeFactory peerFactory, String address, int port){
         this.peerFactory = peerFactory;
@@ -38,26 +39,33 @@ public class TcpServer extends Thread {
         this.port = port;
     }
 
+    public Node createNode() {
+        Node node = null;
+        try {
+            // Wait for a connection then accept
+            Socket socket = serverSocket.accept();
+            node = new TcpNode(socket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return node;
+    }
+
     @Override
     public void run() {
 
         try {
-            ServerSocket serverSocket = new ServerSocket(port);
+            serverSocket = new ServerSocket(port);
 
             while(true) {
-                // Wait connection then accept
-                Socket socket = serverSocket.accept();
+                // Will wait for connection then accept and create a node
+                Node local = createNode();
 
                 // Create the peer node
                 Node peer = peerFactory.createNode();
 
-                // Start peer to socket thread
-                StreamConnectorThread peer2socket = new StreamConnectorThread(peer.getInputStream(), socket.getOutputStream());
-                peer2socket.start();
-
-                // Start socket to peer thread.
-                StreamConnectorThread socket2peer = new StreamConnectorThread(socket.getInputStream(), peer.getOutputStream());
-                socket2peer.start();
+                // Start the connection
+                StreamConnection c = new StreamConnection(local, peer);
             }
 
         } catch (IOException e) {
