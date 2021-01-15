@@ -66,6 +66,7 @@ public class TcpServer extends Thread {
 
                 // Start the connection
                 StreamConnection c = new StreamConnection(local, peer);
+                // TODO: Store connections in a list. Currently previous connection is lost if new connection made.
             }
 
         } catch (IOException e) {

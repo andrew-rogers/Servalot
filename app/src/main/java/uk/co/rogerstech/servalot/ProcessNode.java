@@ -32,6 +32,7 @@ public class ProcessNode implements Node {
 
     private Process process = null;
     private JSONObject description = null;
+    private StreamConnection connection = null;
 
     ProcessNode(File dir_files, List<String> cmd) {
         try {
@@ -51,5 +52,15 @@ public class ProcessNode implements Node {
     public JSONObject getDescription() { return description; }
     public InputStream getInputStream() { return process.getInputStream(); }
     public OutputStream getOutputStream() { return process.getOutputStream(); }
+    public StreamConnection getConnection() { return connection; }
+    public void setConnection(StreamConnection c) { connection = c; }
+    public void close() {
+        try {
+            process.getOutputStream().close();
+            process.getInputStream().close();
+        } catch (IOException e) {
+            // TODO
+        }
+    }
 }
 

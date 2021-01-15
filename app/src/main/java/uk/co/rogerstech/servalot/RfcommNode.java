@@ -32,6 +32,7 @@ public class RfcommNode implements Node {
     private InputStream istream = null;
     private OutputStream ostream = null;
     private JSONObject description = null;
+    private StreamConnection connection = null;
 
     RfcommNode(BluetoothSocket socket) {
         try {
@@ -41,9 +42,12 @@ public class RfcommNode implements Node {
             // TODO
         }
     }
-    
+
     public JSONObject getDescription() { return description; }
     public InputStream getInputStream() { return istream; }
     public OutputStream getOutputStream() { return ostream; }
+    public StreamConnection getConnection() { return connection; }
+    public void setConnection(StreamConnection c) { connection = c; }
+    public void close() {} // TODO: Close streams and release bt socket
 }
 

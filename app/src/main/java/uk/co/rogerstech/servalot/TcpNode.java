@@ -31,6 +31,7 @@ public class TcpNode implements Node {
     private InputStream istream = null;
     private OutputStream ostream = null;
     private JSONObject description = null;
+    private StreamConnection connection = null;
 
     TcpNode(Socket socket) {
         try {
@@ -40,9 +41,19 @@ public class TcpNode implements Node {
             // TODO
         }
     }
-    
+
     public JSONObject getDescription() { return description; }
     public InputStream getInputStream() { return istream; }
     public OutputStream getOutputStream() { return ostream; }
+    public StreamConnection getConnection() { return connection; }
+    public void setConnection(StreamConnection c) { connection = c; }
+    public void close() {
+        try {
+            ostream.close();
+            istream.close();
+        } catch (IOException e) {
+            // TODO
+        }
+    }
 }
 

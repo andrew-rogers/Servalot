@@ -34,6 +34,7 @@ public class RfcommNodeFactory implements NodeFactory {
     private Node node = null;
     private BluetoothSocket btSocket = null;
     private Logger logger = null;
+    private StreamConnection connection = null;
 
     RfcommNodeFactory(final String address) {
         this.address = address;
@@ -45,12 +46,12 @@ public class RfcommNodeFactory implements NodeFactory {
     public Node createNode() {
 
         // Only allow one node to be created
-        Node ret = null;
         if(node == null) {
             node = new RfcommNode(btSocket);
-            ret = node;
+        } else { // Close previous connection and return same RfcommNode, peer will create new connection.
+            node.getConnection().close();
         }
-        return ret;
+        return node;
     }
 
     public void msg(String str)

@@ -27,10 +27,12 @@ public class StreamConnectorThread extends Thread{
 
     private InputStream is;
     private OutputStream os;
+    private StreamConnection connection = null;
 
-    StreamConnectorThread(InputStream is, OutputStream os){
+    StreamConnectorThread(StreamConnection c, InputStream is, OutputStream os){
         this.is=is;
         this.os=os;
+        connection = c;
     }
 
     @Override
@@ -45,8 +47,8 @@ public class StreamConnectorThread extends Thread{
                 os.write(buffer, 0 ,nread);
             }
 
-            // Input stream closed so close output.
-            os.close();
+            // Input stream closed so close connection
+            connection.close();
 
         } catch(IOException e){
             e.printStackTrace();

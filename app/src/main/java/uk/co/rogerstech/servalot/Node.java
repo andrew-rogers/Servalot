@@ -32,5 +32,8 @@ interface Node {
     public JSONObject getDescription();
     public InputStream getInputStream();
     public OutputStream getOutputStream();
+    public StreamConnection getConnection();
+    public void setConnection(StreamConnection c);
+    public void close();
 }
 

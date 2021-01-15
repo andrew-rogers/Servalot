@@ -27,17 +27,25 @@ public class StreamConnection {
     StreamConnection(Node a, Node b){
         node_a=a;
         node_b=b;
+        node_a.setConnection(this);
+        node_b.setConnection(this);
         connect();
     }
 
     public void connect() {
         // Start A to B thread
-        StreamConnectorThread a2b = new StreamConnectorThread(node_a.getInputStream(), node_b.getOutputStream());
+        StreamConnectorThread a2b = new StreamConnectorThread(this, node_a.getInputStream(), node_b.getOutputStream());
         a2b.start();
 
         // Start B to A thread.
-        StreamConnectorThread b2a = new StreamConnectorThread(node_b.getInputStream(), node_a.getOutputStream());
+        StreamConnectorThread b2a = new StreamConnectorThread(this, node_b.getInputStream(), node_a.getOutputStream());
         b2a.start();
+
+    }
+
+    public void close() {
+        node_a.close();
+        node_b.close();
     }
 
 }
