@@ -28,7 +28,6 @@ alt Android WebView
   WebViewHelper -> WebViewHelper: json = obj.toString();
   WebViewHelper -> Servalot: wvi.response(json)
 else Browser and WebSocket server
-  Servalot -> Servalot: create XHR
   Servalot -> WsServer : MESSAGE json
   WsServer -> WsServer: obj = new JSONObject(json);
   WsServer -> handler: command(obj, crl)

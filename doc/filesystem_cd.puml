@@ -1,0 +1,15 @@
+@startuml
+
+FileSystem <|-- AndroidFileSystem
+FileSystem <|-- PCFileSystem
+
+class AndroidFileSystem
+note left: On instantiation check that\nconfiguration files exist or\ncopy from assets.
+
+class FileSystem {
+ +getFilesDir() : File
+ #filesDir : File
+}
+
+@enduml
+
