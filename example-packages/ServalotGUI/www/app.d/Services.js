@@ -29,6 +29,16 @@ var Services = function(servalot, gui) {
     this.div_controls = gui.getAppControlsDiv();
     this.div_main = gui.getMainDiv();
 
+    // If in WebView, show install button.
+    if (typeof wvi !== 'undefined') {
+        var btn_install = document.createElement("button");
+        btn_install.innerHTML = "Install package...";
+        this.div_main.appendChild(btn_install);
+        btn_install.onclick = function() {
+            servalot.command({cmd: "install"});
+        };
+    }
+
     var rf = new RfcommControls(function(obj, callback) {servalot.command(obj, callback);});
     this.div_main.appendChild(rf.div);
     rf.show();
