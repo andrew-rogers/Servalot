@@ -44,6 +44,8 @@ var Editor = function(servalot, gui) {
 Editor.prototype.createGUI = function () {
     this.div_main.innerHTML="";
     this.ta_edit = document.createElement("textarea");
+    this.ta_edit.style.minWidth="100%";
+    this.ta_edit.rows=20;
     this.div_main.appendChild(this.ta_edit);
 };
 

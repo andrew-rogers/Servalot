@@ -19,28 +19,31 @@
     </head>
     <body>
         <div class="fixed" id="div_nav"></div>
-        <div id="div_main"></div>
-        <h1>ServalotGUI package</h1>
-        <div id="div_buttons">
-            <input type="button" value="Install package..." onClick="install()" />
-            <input type="button" value="List Bluetooth devices" onClick="listBT()" />
-            <input type="button" value="Eval main.js" onClick="evalJsCmd('www/main.js')" />
-            <input type="button" value="Get" onClick="httpget('https://github.com/andrew-rogers/andrew-rogers.github.io/raw/master/Servalot/Packages/HTTPDemo.zip', 'thing.zip')" />
+        <div id="div_main">
+            <h1>ServalotGUI package</h1>
+            <div id="div_buttons">
+                <input type="button" value="Install package..." onClick="install()" />
+                <input type="button" value="List Bluetooth devices" onClick="listBT()" />
+                <input type="button" value="Eval main.js" onClick="evalJsCmd('www/main.js')" />
+                <input type="button" value="Get" onClick="httpget('https://github.com/andrew-rogers/andrew-rogers.github.io/raw/master/Servalot/Packages/HTTPDemo.zip', 'thing.zip')" />
+            </div>
+            <div id="div_run">
+                <textarea id="ta_cmd" rows=1></textarea>
+                <input type="button" value="Run" onClick="execCmd()" />
+            </div>
+            <div id="div_controls"></div>
+            <textarea id="ta_log" rows=20></textarea>
         </div>
-        <div id="div_run">
-            <textarea id="ta_cmd" rows=1></textarea>
-            <input type="button" value="Run" onClick="execCmd()" />
-        </div>
-        <div id="div_controls"></div>
-        <textarea id="ta_log" rows=20></textarea>
         <script type="text/javascript">
 
 var div_controls = document.getElementById("div_controls");
 var div_nav = document.getElementById("div_nav");
+var div_main = document.getElementById("div_main");
 var ta = document.getElementById("ta_log");
 var ta_cmd = document.getElementById("ta_cmd");
 ta.style.width="100%";
 ta_cmd.style.width="80%";
+
 
 
 function log(str) {
@@ -51,6 +54,10 @@ var servalot = new Servalot();
 var nav = new AppNavigator(div_nav, servalot);
 nav.getMainDiv = function() {
     return div_main;
+};
+
+div_main.onfocus=function(){
+    nav.shrink();
 };
 
 var apps = {};
