@@ -23,8 +23,6 @@
             <h1>ServalotGUI package</h1>
             <div id="div_buttons">
                 <input type="button" value="Install package..." onClick="install()" />
-                <input type="button" value="List Bluetooth devices" onClick="listBT()" />
-                <input type="button" value="Eval main.js" onClick="evalJsCmd('www/main.js')" />
                 <input type="button" value="Get" onClick="httpget('https://github.com/andrew-rogers/andrew-rogers.github.io/raw/master/Servalot/Packages/HTTPDemo.zip', 'thing.zip')" />
             </div>
             <div id="div_run">
@@ -56,7 +54,7 @@ nav.getMainDiv = function() {
     return div_main;
 };
 
-div_main.onfocus=function(){
+div_main.onclick=function(){
     nav.shrink();
 };
 
@@ -66,26 +64,15 @@ function install() {
     servalot.command({cmd: "install"});
 }
 
-let rf = new RfcommControls(function(obj, callback) {servalot.command(obj, callback);});
-div_controls.appendChild(rf.div);
 
-function listBT() {
-    rf.show();
-}
 
-function evalJs(obj) {
-    let script=atob(obj.stdout);
-    eval(script);
-}
 
-function evalJsCmd(js_file) {
-    servalot.command({cmd: "exec", args: ["sh", "-c", "cat "+js_file]},evalJs);
-}
 
 function launchApp(name) {
     var div_controls=nav.getAppControlsDiv();
     div_controls.innerHTML="";
     div_controls.style.display = "block";
+    div_main.innerHTML="";
     eval(apps[name].launch);
 }
 
@@ -141,7 +128,6 @@ function listfiles(dir, callback) {
     });
 }
 
-evalJsCmd("main.js");
 servalot.command({cmd: "ready", msg: "Hi!"});
 
 

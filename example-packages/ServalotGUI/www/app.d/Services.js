@@ -25,26 +25,12 @@
  *
  */
 
-var Editor = function(servalot, gui) {
+var Services = function(servalot, gui) {
     this.div_controls = gui.getAppControlsDiv();
     this.div_main = gui.getMainDiv();
-    this.file_controls = new FileControls(servalot, this.div_controls);
-    this.createGUI();
-    
-    // Register the callbacks
-    var that = this;
-    this.file_controls.registerLoadText(function(text) {
-        that.ta_edit.value = text;
-    });
-    this.file_controls.registerSaveText(function() {
-        return that.ta_edit.value;
-    });
-};
 
-Editor.prototype.createGUI = function () {
-    this.ta_edit = document.createElement("textarea");
-    this.ta_edit.style.minWidth="100%";
-    this.ta_edit.rows=20;
-    this.div_main.appendChild(this.ta_edit);
+    var rf = new RfcommControls(function(obj, callback) {servalot.command(obj, callback);});
+    this.div_main.appendChild(rf.div);
+    rf.show();
 };
 
