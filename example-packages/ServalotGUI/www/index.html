@@ -2,11 +2,24 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8">
+        <style>
+            .fixed {
+              position: fixed;
+              right: 5px;
+              background-color: #ffff77;
+            }
+        </style>
         <script src="Servalot.js"></script>
         <script src="ConfigButton.js"></script>
         <script src="RfcommControls.js"></script>
+        <script src="AppNavigator.js"></script>
+        <script src="Menu.js"></script>
+        <script src="FileSelector.js"></script>
+        <script src="FileControls.js"></script>
     </head>
     <body>
+        <div class="fixed" id="div_nav"></div>
+        <div id="div_main"></div>
         <h1>ServalotGUI package</h1>
         <div id="div_buttons">
             <input type="button" value="Install package..." onClick="install()" />
@@ -23,16 +36,24 @@
         <script type="text/javascript">
 
 var div_controls = document.getElementById("div_controls");
+var div_nav = document.getElementById("div_nav");
 var ta = document.getElementById("ta_log");
 var ta_cmd = document.getElementById("ta_cmd");
 ta.style.width="100%";
 ta_cmd.style.width="80%";
+
 
 function log(str) {
     ta.value = ta.value + str + "\n";
 }
 
 var servalot = new Servalot();
+var nav = new AppNavigator(div_nav, servalot);
+nav.getMainDiv = function() {
+    return div_main;
+};
+
+var apps = {};
 
 function install() {
     servalot.command({cmd: "install"});
@@ -54,6 +75,28 @@ function evalJsCmd(js_file) {
     servalot.command({cmd: "exec", args: ["sh", "-c", "cat "+js_file]},evalJs);
 }
 
+function launchApp(name) {
+    var div_controls=nav.getAppControlsDiv();
+    div_controls.innerHTML="";
+    div_controls.style.display = "block";
+    eval(apps[name].launch);
+}
+
+function loadApp(name) {
+    if( apps[name] !== undefined ) {
+        launchApp(name);
+    } else {
+        var script=document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'app.d/'+name+'.js';
+        script.onload = function() {
+            apps[name] = {launch: 'new '+name+'(servalot, nav)'};
+            launchApp(name);
+        };
+        document.head.appendChild(script);
+    }
+}
+
 function cmdResponse(obj) {
     log(atob(obj.stdout));
 }
@@ -66,8 +109,35 @@ function httpget(url, filename) {
     servalot.command({cmd: "httpget", url: url, filename: filename});
 }
 
+function listfiles(dir, callback) {
+    if( dir.length == 0) dir='$PWD';
+    var script = 'cd "'+dir+'" || cd "$PWD"\n'
+               + 'pwd\n'
+               + 'for f in *; do\n'
+               + '  [ -d "$f" ] && echo "d\t$f"\n'
+               + 'done\n'
+               + 'for f in *; do\n'
+               + '  [ -f "$f" ] && echo "f\t$f"\n'
+               + 'done\n'
+    servalot.command({cmd: "exec", args: ["sh", "-s", ], stdin: btoa(script)}, function(obj) {
+        let list=atob(obj.stdout).split('\n');
+        let obj1={dir: list[0], list: []};
+        obj1.list.push({flags: 'd', path: '..'});
+        for( var i=1; i<list.length; i++) {
+            var parts=list[i].split('\t');
+            if( parts.length==2 ){
+                var obj={flags: parts[0], path: parts[1]};
+                obj1.list.push(obj);
+            }
+        }
+        callback(obj1);
+    });
+}
+
 evalJsCmd("main.js");
 servalot.command({cmd: "ready", msg: "Hi!"});
+
+
 
         </script>
     </body>

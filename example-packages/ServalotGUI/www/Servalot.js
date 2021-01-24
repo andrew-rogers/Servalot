@@ -28,14 +28,14 @@
 var Servalot = function() {
     this.pending = {};
     if (typeof wvi !== 'undefined') {
-        that = this;
+        var that = this;
         wvi.response = function(json) { if(log)log("R:"+json); that.response(JSON.parse(json)); };
     }
     else
     {
         var hostname = window.location.hostname;
         this.ws = new WebSocket("ws://" + hostname + ":8800");
-        that = this;
+        var that = this;
         this.ws.onmessage = function (e) {
             that.response(JSON.parse(e.data));
         };
