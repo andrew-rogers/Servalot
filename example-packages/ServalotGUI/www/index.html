@@ -21,9 +21,7 @@
         <div class="fixed" id="div_nav"></div>
         <div id="div_main">
             <h1>ServalotGUI package</h1>
-            <div id="div_buttons">
-                <input type="button" value="Get" onClick="httpget('https://github.com/andrew-rogers/andrew-rogers.github.io/raw/master/Servalot/Packages/HTTPDemo.zip', 'thing.zip')" />
-            </div>
+            
             <div id="div_run">
                 <textarea id="ta_cmd" rows=1></textarea>
                 <input type="button" value="Run" onClick="execCmd()" />
@@ -90,9 +88,7 @@ function execCmd() {
     servalot.command({cmd: "exec", args: ["sh", "-c", ta_cmd.value]}, cmdResponse);
 }
 
-function httpget(url, filename) {
-    servalot.command({cmd: "httpget", url: url, filename: filename});
-}
+
 
 function listfiles(dir, callback) {
     if( dir.length == 0) dir='$PWD';
