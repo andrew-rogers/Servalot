@@ -1,6 +1,6 @@
 /*
     Servalot - An inetd like multi-server
-    Copyright (C) 2020,2021  Andrew Rogers
+    Copyright (C) 2021  Andrew Rogers
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,30 +19,37 @@
 
 package uk.co.rogerstech.servalot;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.java_websocket.WebSocket;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
-abstract class Node {
+public class WsNode extends Node {
 
-    protected int id=0;
-    protected InputStream istream = null;
-    protected OutputStream ostream = null;
-    protected JSONObject description = null;
-    protected StreamConnection connection = null;
+	private String cb_num = null;
+	private WebSocket websocket = null;
 
-    public Node() {
-		id = NodeList.getInstance().registerNode(this);
-		Logger.getInstance().info("New node id=" + id);
+    WsNode(WebSocket ws) {
+        websocket = ws;
+    }
+
+	public void setCBNum(String cbnum) {
+		cb_num=cbnum;
 	}
 
-    public JSONObject getDescription() { return description; }
-    public InputStream getInputStream() { return istream; }
-    public OutputStream getOutputStream() { return ostream; }
-    public StreamConnection getConnection() { return connection; }
-    public void setConnection(StreamConnection c) { connection = c; }
-    public void send(JSONObject obj){};
-    abstract public void close();
+	public void send(JSONObject obj){
+		try {
+			if( cb_num != null ) obj.put("cb_num",cb_num);
+		}
+		catch(JSONException e) {
+            // TODO
+        }
+        websocket.send(obj.toString());
+	}
+
+    public void close() {
+		// TODO: Close streams and release bt socket
+		NodeList.getInstance().remove(id);
+	}
 }
 

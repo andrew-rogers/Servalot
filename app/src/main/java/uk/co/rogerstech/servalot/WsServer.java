@@ -28,6 +28,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -50,13 +51,13 @@ public class WsServer extends WebSocketServer {
 
     private Logger logger = null;
     private WsHttpHandler httpHandler = null;
-    private WsServerCommandResponseListener crl = null;
+    private HashMap<WebSocket, WsNode> nodes;
 
 	public WsServer( int port ) throws UnknownHostException {
         super( new InetSocketAddress( port ), new ArrayList<Draft>(Arrays.asList(new Draft_6455(), new Draft_HTTPD())) );
-    logger = Logger.getInstance();
+        logger = Logger.getInstance();
         setReuseAddr(true);
-        crl = new WsServerCommandResponseListener();
+        nodes = new HashMap<WebSocket, WsNode>();
 	}
 
 	@Override
@@ -76,6 +77,7 @@ public class WsServer extends WebSocketServer {
         if( h.getFieldValue("Upgrade").equals("websocket") ) {
             logger.info("WS open ");
             ws.send("Hello!");
+            nodes.put(ws, new WsNode(ws));
         }
         else {
             // Send the HTML and close
@@ -87,6 +89,10 @@ public class WsServer extends WebSocketServer {
     @Override
     public void onClose( WebSocket ws, int code, String reason, boolean remote ) {
 	    logger.info("WS close");
+	    if( nodes.containsKey(ws) ) {
+	        nodes.get(ws).close();
+	        nodes.remove(ws);
+	    }
     }
 
 	@Override
@@ -97,7 +103,11 @@ public class WsServer extends WebSocketServer {
             JSONObject obj = new JSONObject(message);
             cmd = obj.getString("cmd");
             if( cmd != null ) {
-                CommandHandler.getInstance().command(obj, crl);
+                WsNode node = nodes.get(ws);
+                if( obj.has("cb_num") ) {
+                    node.setCBNum(obj.getString("cb_num"));
+                }
+                CommandHandler.getInstance().command(obj, node);
             }
         }
         catch(JSONException e) {
@@ -217,12 +227,5 @@ public class WsServer extends WebSocketServer {
             return new HttpResponse(html);
         }
     }
-
-    public class WsServerCommandResponseListener extends CommandHandler.ResponseListener {
-        public void onResponse(final JSONObject obj) {
-            broadcast(obj.toString());
-        }
-    }
-
 }
 

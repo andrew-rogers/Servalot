@@ -60,10 +60,29 @@ public class CommandHandler {
         }
     }
 
+    public void command(final JSONObject obj, Node node) {
+        try {
+            String str_cmd = obj.getString("cmd");
+            Command cmd = commands.get(str_cmd);
+            if (cmd!=null) cmd.execute(obj, node);
+            else logger.error("Unknown command: "+str_cmd);
+        }
+        catch(JSONException e) {
+            // TODO
+        }
+    }
+
     static class CommandArgs {
         private JSONObject obj_cmd = null;
         private JSONObject obj_response = null;
         private ResponseListener response_listener = null;
+        private Node response_node = null;
+
+        CommandArgs(final JSONObject cmd, Node node) {
+            obj_cmd = cmd;
+            response_node = node;
+            obj_response=new JSONObject();
+        }
 
         CommandArgs(final JSONObject cmd, ResponseListener l) {
             obj_cmd = cmd;
@@ -136,7 +155,8 @@ public class CommandHandler {
         }
 
         public void respond() {
-            response_listener.sendResponse(obj_response);
+            if( response_listener != null ) response_listener.sendResponse(obj_response);
+            if( response_node != null ) response_node.send(obj_response);
         }
     }
 
@@ -151,6 +171,10 @@ public class CommandHandler {
 
         public String getName() {
             return name;
+        }
+
+        public void execute(final JSONObject cmd, Node node) {
+            onExecute(new CommandHandler.CommandArgs(cmd, node));
         }
 
         public void execute(final JSONObject cmd, ResponseListener l) {
