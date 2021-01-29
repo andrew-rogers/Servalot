@@ -42,7 +42,7 @@ public class WebViewHelper{
         this.activity = activity;
         webView = new WebView(activity);
         activity.setContentView(webView);
-        logger = new WebViewLogger();
+        logger = Logger.getInstance();
         CommandHandler.getInstance().registerCommand(new CommandReady());
         initWebView();
     }
@@ -74,7 +74,7 @@ public class WebViewHelper{
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                webView.evaluateJavascript("wvi.response(\"" + str.replace("\"","\\\"") + "\");", null);
+                webView.evaluateJavascript("wvi.response(\"" + str.replace("\\","\\\\").replace("\"","\\\"") + "\");", null);
             }
         });
     }
@@ -91,7 +91,7 @@ public class WebViewHelper{
 
         public void onExecute(CommandHandler.CommandArgs args) {
             wvReady = true;
-            logger.toast("WebView ready. "+args.getString("msg"));
+            logger.info("WebView ready. "+args.getString("msg"));
         }
     }
 
@@ -119,50 +119,5 @@ public class WebViewHelper{
         }
 
     }
-
-    public class WebViewLogger extends Logger {
-
-        WebViewLogger() {
-            instance = this;
-        }
-
-        public void error(final String str) {
-            log("E",str);
-        }
-
-        public void info(final String str) {
-            log("I",str);
-        }
-
-        public void toast(final String str) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(activity.getApplicationContext(), str, Toast.LENGTH_LONG)
-                         .show();
-                }
-            });
-        }
-
-        private void log(final String type, final String str) {
-            if(ready()) {
-                JSONObject obj=new JSONObject();
-                try {
-                    obj.put("cmd","log");
-                    obj.put("type",type);
-                    obj.put("arg",str);
-                    sendToWebView(obj.toString());
-                }
-                catch(JSONException e) {
-		            // TODO
-                }
-            }
-            else {
-                toast(type+": "+str);
-            }
-        }
-
-    }
-
 }
 

@@ -104,7 +104,7 @@ public class WsServer extends WebSocketServer {
             // TODO
         }
 
-        // Only broadcast if the message in not a command.
+        // Only broadcast if the message is not a command.
         if (cmd==null) broadcast( message );
 	}
 

@@ -30,23 +30,23 @@ var Experimental = function(servalot, gui) {
     this.div_controls = gui.getAppControlsDiv();
     this.div_main = gui.getMainDiv();
 
+    this.createCmdGUI();
+
+};
+
+Experimental.prototype.createCmdGUI = function() {
+
     // Create a get button
     var btn_get = document.createElement("button");
     btn_get.innerHTML = "Get";
     this.div_main.appendChild(btn_get);
 
-    this.createCmdGUI();
+    // Create a Logs button
+    var btn_logs = document.createElement("button");
+    btn_logs.innerHTML = "Logs";
+    this.div_main.appendChild(btn_logs);
 
-    // For now, get file from fixed location when button is clicked.
-    btn_get.onclick=function() {
-        var url = 'https://github.com/andrew-rogers/andrew-rogers.github.io/raw/master/Servalot/Packages/HTTPDemo.zip';
-        var filename = 'thing.zip';
-        servalot.command({cmd: "httpget", url: url, filename: filename});
-    };
-};
-
-Experimental.prototype.createCmdGUI = function() {
-
+    // Div for shell commands
     var div_run = document.createElement("div");
     this.div_main.appendChild(div_run);
 
@@ -67,6 +67,23 @@ Experimental.prototype.createCmdGUI = function() {
     ta_output.style.width="100%";
     div_run.appendChild(ta_output);
 
+    // For now, get file from fixed location when button is clicked.
+    btn_get.onclick=function() {
+        var url = 'https://github.com/andrew-rogers/andrew-rogers.github.io/raw/master/Servalot/Packages/HTTPDemo.zip';
+        var filename = 'thing.zip';
+        servalot.command({cmd: "httpget", url: url, filename: filename});
+    };
+
+    // Handle click event
+    var that = this;
+    btn_logs.onclick=function() {
+        that.servalot.command({cmd: "readlogs"}, function(obj) {
+            var str="";
+            for( var i=0; i<obj.logs.length; i++) str = str + obj.logs[i].type + ": " + obj.logs[i].msg + "\n";
+            ta_output.value = ta_output.value + str + "\n";
+        });
+    };
+
     // Handle click event
     var that = this;
     btn_run.onclick=function() {
@@ -75,4 +92,5 @@ Experimental.prototype.createCmdGUI = function() {
             ta_output.value = ta_output.value + str + "\n";
         });
     };
+
 };

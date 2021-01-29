@@ -1,6 +1,6 @@
 /*
     Servalot - An inetd like multi-server
-    Copyright (C) 2020  Andrew Rogers
+    Copyright (C) 2021  Andrew Rogers
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,14 +19,69 @@
 
 package uk.co.rogerstech.servalot;
 
-abstract class Logger {
+import java.util.ArrayDeque;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-    protected static Logger instance = null;
+public class Logger {
 
-    static Logger getInstance() { return instance; }
+	private ArrayDeque<JSONObject> queue;
+	private int max=100;
 
-    abstract void error(final String str);
-    abstract void info(final String str);
-    abstract void toast(final String str);
+	// Private constructor prevents instantiation.
+	private Logger(){
+		queue = new ArrayDeque<JSONObject>(max);
+		CommandHandler.getInstance().registerCommand(new CommandReadLogs());
+	}
+
+	// Using the Bill Pugh Singleton pattern.
+	private static class BillPughInner {
+		private static Logger instance = new Logger();
+	}
+
+	public static Logger getInstance() {
+		return BillPughInner.instance;
+	}
+
+	private void put(final String type, final String msg) {
+		try {
+			JSONObject obj = new JSONObject();
+			obj.put("type", type);
+			obj.put("msg", msg);
+			while( queue.size() >= max) queue.poll();
+			queue.add(obj);
+		}
+		catch(JSONException e) {
+			// TODO
+		}
+	}
+
+	public void error(final String str) {
+		put("E", str);
+	}
+
+	public void info(final String str) {
+		put("I", str);
+	}
+
+	public class CommandReadLogs extends CommandHandler.Command {
+
+        CommandReadLogs() {
+            setName("readlogs");
+        }
+
+        public void onExecute(CommandHandler.CommandArgs args) {
+			try {
+				JSONObject objs[] = queue.toArray(new JSONObject[0]);
+				JSONArray arr = new JSONArray(objs);
+				args.put("logs", arr);
+			}
+			catch(JSONException e) {
+				// TODO
+			}
+            args.respond();
+        }
+    }
 }
 

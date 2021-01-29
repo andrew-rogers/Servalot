@@ -38,11 +38,11 @@ public class StreamConnection {
 
     public void connect() {
         // Start A to B thread
-        StreamConnectorThread a2b = new StreamConnectorThread(this, node_a.getInputStream(), node_b.getOutputStream());
+        StreamConnectorThread a2b = new StreamConnectorThread(node_a.getInputStream(), node_b.getOutputStream());
         a2b.start();
 
         // Start B to A thread.
-        StreamConnectorThread b2a = new StreamConnectorThread(this, node_b.getInputStream(), node_a.getOutputStream());
+        StreamConnectorThread b2a = new StreamConnectorThread(node_b.getInputStream(), node_a.getOutputStream());
         b2a.start();
 
     }
@@ -56,12 +56,10 @@ public class StreamConnection {
 
         private InputStream is;
         private OutputStream os;
-        private StreamConnection connection = null;
 
-        StreamConnectorThread(StreamConnection c, InputStream is, OutputStream os){
+        StreamConnectorThread(InputStream is, OutputStream os){
             this.is=is;
             this.os=os;
-            connection = c;
         }
 
         @Override
@@ -77,7 +75,7 @@ public class StreamConnection {
                 }
 
                 // Input stream closed so close connection
-                connection.close();
+                close();
 
             } catch(IOException e){
                 e.printStackTrace();
