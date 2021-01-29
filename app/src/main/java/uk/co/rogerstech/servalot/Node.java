@@ -1,6 +1,6 @@
 /*
     Servalot - An inetd like multi-server
-    Copyright (C) 2020  Andrew Rogers
+    Copyright (C) 2020,2021  Andrew Rogers
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,19 +21,23 @@ package uk.co.rogerstech.servalot;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.json.JSONObject;
 
-interface Node {
+abstract class Node {
 
-    static final AtomicInteger counter = new AtomicInteger();
+    protected int id=0;
 
-    public JSONObject getDescription();
-    public InputStream getInputStream();
-    public OutputStream getOutputStream();
-    public StreamConnection getConnection();
-    public void setConnection(StreamConnection c);
-    public void close();
+    public Node() {
+		id = NodeList.getInstance().registerNode(this);
+		Logger.getInstance().info("New node id=" + id);
+	}
+
+    abstract public JSONObject getDescription();
+    abstract public InputStream getInputStream();
+    abstract public OutputStream getOutputStream();
+    abstract public StreamConnection getConnection();
+    abstract public void setConnection(StreamConnection c);
+    abstract public void close();
 }
 

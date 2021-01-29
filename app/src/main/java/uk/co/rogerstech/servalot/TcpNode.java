@@ -26,7 +26,7 @@ import java.net.Socket;
 
 import org.json.JSONObject;
 
-public class TcpNode implements Node {
+public class TcpNode extends Node {
 
     private InputStream istream = null;
     private OutputStream ostream = null;
@@ -54,6 +54,7 @@ public class TcpNode implements Node {
         } catch (IOException e) {
             // TODO
         }
+        NodeList.getInstance().remove(id);
     }
 }
 

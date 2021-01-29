@@ -27,7 +27,7 @@ import java.io.OutputStream;
 
 import org.json.JSONObject;
 
-public class RfcommNode implements Node {
+public class RfcommNode extends Node {
 
     private InputStream istream = null;
     private OutputStream ostream = null;
@@ -48,6 +48,9 @@ public class RfcommNode implements Node {
     public OutputStream getOutputStream() { return ostream; }
     public StreamConnection getConnection() { return connection; }
     public void setConnection(StreamConnection c) { connection = c; }
-    public void close() {} // TODO: Close streams and release bt socket
+    public void close() {
+		// TODO: Close streams and release bt socket
+		NodeList.getInstance().remove(id);
+	}
 }
 

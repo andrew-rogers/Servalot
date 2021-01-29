@@ -28,7 +28,7 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
-public class ProcessNode implements Node {
+public class ProcessNode extends Node {
 
     private Process process = null;
     private JSONObject description = null;
