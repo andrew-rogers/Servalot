@@ -156,6 +156,7 @@ public class WebViewHelper{
         public void onMessage(JSONObject obj) {
             try {
                 Integer src = new Integer(0);
+                Logger.getInstance().info("Msg: "+obj.toString());
                 if( obj.has("src") ) {
                     src = new Integer(obj.getString("src"));
                 }

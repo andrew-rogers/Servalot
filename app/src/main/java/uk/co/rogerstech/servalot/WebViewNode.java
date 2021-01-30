@@ -39,8 +39,9 @@ public class WebViewNode extends Node {
 		server.send( this, obj );
 	}
 
-    public void close() {
-		NodeList.getInstance().remove(id);
+    @Override
+    public void onClose() {
+        server.onClose(port);
 	}
 }
 

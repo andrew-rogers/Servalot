@@ -32,6 +32,7 @@ abstract class Node {
     protected JSONObject description = null;
     protected StreamConnection connection = null;
     protected Node peer = null;
+    protected Boolean closed = false;
 
     public Node() {
 		id = NodeList.getInstance().registerNode(this);
@@ -46,6 +47,9 @@ abstract class Node {
 	    if( peer != null ) peer.send(obj);
 	}
 
+	public void onClose() {
+	}
+
     public JSONObject getDescription() { return description; }
     public InputStream getInputStream() { return istream; }
     public OutputStream getOutputStream() { return ostream; }
@@ -54,6 +58,16 @@ abstract class Node {
     public void send(JSONObject obj){
         // TODO: Delimit for streaming
     };
-    abstract public void close();
+
+    public void close() {
+        if( ! closed ) {
+            closed = true;
+            if( peer != null ) {
+                peer.close();
+            }
+            onClose();
+        }
+		NodeList.getInstance().remove(id);
+	}
 }
 

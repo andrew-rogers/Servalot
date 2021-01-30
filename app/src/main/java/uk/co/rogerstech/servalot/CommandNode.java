@@ -32,14 +32,5 @@ public class CommandNode extends Node {
     public void send(JSONObject obj){
 		command_handler.command(obj, this);
 	}
-
-    public void close() {
-        if( peer != null ) {
-            Node p = peer;
-            peer = null;
-            p.close();
-        }
-        NodeList.getInstance().remove(id);
-    }
 }
 
