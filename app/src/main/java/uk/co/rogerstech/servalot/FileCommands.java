@@ -19,6 +19,7 @@
 
 package uk.co.rogerstech.servalot;
 
+import java.lang.*;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -31,6 +32,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,19 +114,38 @@ public class FileCommands {
         return Base64.encodeBytes(output.toString().getBytes());
     }
 
-    public void httpGet(final String url, final String filename) {
+    public void httpGet(CommandHandler.CommandArgs args) {
+        final String url = args.getString("url");
+        final String filename = args.getString("filename");
         try {
             URL u = new URL(url);
+
+            URLConnection c = u.openConnection();
+            c.connect();
+            int len = c.getContentLength();
+
             InputStream is = u.openStream();
             DataInputStream dis = new DataInputStream(new BufferedInputStream(is));
             FileOutputStream fos = new FileOutputStream(new File(root_dir, filename));
             byte[] buf = new byte[4096];
             int cnt;
+            int done=0;
+            long next = System.currentTimeMillis();
             while ((cnt = dis.read(buf)) > 0) {
                 fos.write(buf, 0, cnt);
+                done = done + cnt;
+                long ct = System.currentTimeMillis();
+                if( ct >= next ) {
+                    next = next + 1000;
+                    args.put("done", ""+done);
+                    args.put("len", ""+len);
+                    args.send();
+                }
             }
             fos.close();
             is.close();
+            args.put("done", ""+done);
+            args.put("len", ""+len);
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -151,7 +172,7 @@ public class FileCommands {
         }
 
         public void onExecute(CommandHandler.CommandArgs args) {
-            httpGet(args.getString("url"), args.getString("filename"));
+            httpGet(args);
             args.respond();
         }
     }

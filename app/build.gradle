@@ -29,6 +29,7 @@ sourceSets {
             exclude '**/RfcommNode.java'
             exclude '**/RfcommNodeFactory.java'
             exclude '**/WebViewHelper.java'
+            exclude '**/WebViewNode.java'
             exclude '**/BackgroundService.java'
         }
     }

@@ -68,10 +68,14 @@ Experimental.prototype.createCmdGUI = function() {
     div_run.appendChild(ta_output);
 
     // For now, get file from fixed location when button is clicked.
+    var that = this;
     btn_get.onclick=function() {
-        var url = 'https://github.com/andrew-rogers/andrew-rogers.github.io/raw/master/Servalot/Packages/HTTPDemo.zip';
+        //var url = 'https://github.com/andrew-rogers/andrew-rogers.github.io/raw/master/Servalot/Packages/HTTPDemo.zip';
+        var url = 'http://uk.alpinelinux.org/alpine/v3.13/main/aarch64/clang-libs-10.0.1-r0.apk';
         var filename = 'thing.zip';
-        that.servalot.command({cmd: "httpget", url: url, filename: filename});
+        that.servalot.command({cmd: "httpget", url: url, filename: filename}, function(obj) {
+            ta_output.value = ta_output.value + JSON.stringify(obj) + "\n";
+        });
     };
 
     // Handle click event

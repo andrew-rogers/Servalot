@@ -133,6 +133,12 @@ public class CommandHandler {
             return ret;
         }
 
+        public void send() {
+            if( response_node != null ) {
+                response_node.onMessage(obj_response);
+            }
+        }
+
         public void respond() {
             if( response_node != null ) {
                 response_node.onMessage(obj_response);
@@ -156,14 +162,6 @@ public class CommandHandler {
 
         public void execute(final JSONObject cmd, Node node) {
             onExecute(new CommandHandler.CommandArgs(cmd, node));
-        }
-    }
-
-    abstract static class ResponseListener {
-        abstract void onResponse(final JSONObject obj);
-
-        public void sendResponse(final JSONObject obj) {
-            onResponse(obj);
         }
     }
 }

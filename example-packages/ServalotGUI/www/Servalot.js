@@ -67,9 +67,14 @@ Servalot.prototype.command = function(obj, callback) {
 Servalot.prototype.response = function(obj) {
     let n=obj.dst;
     if( n !== undefined ) {
-        let cb=this.pending[n];
-        if( cb !== undefined ) cb(obj);
-        delete this.pending[n];
+        var tcf = obj.tcf;
+        if( tcf !== undefined && tcf.includes("f") ) {
+            delete this.pending[n];
+        }
+        else {
+            var cb=this.pending[n];
+            if( cb !== undefined ) cb(obj);
+        }
     }
 };
 

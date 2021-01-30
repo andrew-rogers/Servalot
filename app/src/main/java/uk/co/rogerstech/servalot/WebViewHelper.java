@@ -100,15 +100,29 @@ public class WebViewHelper{
     public class WebViewInterface {
 
         @JavascriptInterface
-        public void command(String cmd) {
+        public void command(final String cmd) {
+            if( wvReady ) {
+                new Thread( new Runnable() {
+                    @Override
+                    public void run() {
+                        command1(cmd);
+                    }
+                } ).start();
+            }
+            else {
+                command1(cmd);
+            }
+        }
+
+        private void command1(String cmd) {
             if( cmd.charAt(0) == '{' ) {
                 try {
-                    JSONObject obj = new JSONObject(cmd);
+                    final JSONObject obj = new JSONObject(cmd);
                     Integer dst = new Integer(0);
                     if( obj.has("dst") ) dst = new Integer(obj.getString("dst"));
 
                     if( servers.containsKey(dst) ) {
-                        WebViewServer s = servers.get(dst);
+                        final WebViewServer s = servers.get(dst);
                         s.onMessage(obj);
                     }
                 }
@@ -173,8 +187,17 @@ public class WebViewHelper{
         }
 
         public void onClose(Integer src) {
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("tcf","f");
+            }
+            catch(JSONException e) {
+		        // TODO
+            }
             if( nodes.containsKey(src) ) {
-	            nodes.get(src).close();
+                WebViewNode node = nodes.get(src);
+                send( node, obj );
+	            node.close();
 	            nodes.remove(src);
 	        }
 	    }
@@ -182,7 +205,7 @@ public class WebViewHelper{
 	    public void send(WebViewNode node, JSONObject obj) {
 	        Integer src = node.getPort();
 	        try {
-	            obj.put("src", port);
+	            obj.put( "src", ""+port);
 	            obj.put( "dst", src.toString() );
 	            sendToWebView(obj.toString());
 	        }
