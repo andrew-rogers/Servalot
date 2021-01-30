@@ -31,36 +31,36 @@ var Servalot = function() {
         var that = this;
         wvi.response = function(json) { if(log)log("R:"+json); that.response(JSON.parse(json)); };
     }
-    else
-    {
-        var hostname = window.location.hostname;
-        this.ws = new WebSocket("ws://" + hostname + ":8800");
-        var that = this;
-        this.ws.onmessage = function (e) {
-            that.response(JSON.parse(e.data));
-        };
-    }
 };
 
 Servalot.prototype.command = function(obj, callback) {
 
-    if( callback !== undefined ) {
-        // Find smallest number not already pending
-        let n = 0;
-        while( this.pending[n] !== undefined ) n=n+1;
-
-        // Store the callback
-        this.pending[n] = callback;
-        obj.src = ""+n;
-        obj.dst = "0"; // Command server
-    }
-
     if (typeof wvi !== 'undefined') {
+        if( callback !== undefined ) {
+            // Find smallest number not already pending
+            let n = 0;
+            while( this.pending[n] !== undefined ) n=n+1;
+
+            // Store the callback
+            this.pending[n] = callback;
+            obj.src = ""+n;
+            obj.dst = "0"; // Command server
+        }
         wvi.command(JSON.stringify(obj));
     }
     else
     {
-        this.ws.send(JSON.stringify(obj));
+        var hostname = window.location.hostname;
+        var ws = new WebSocket("ws://" + hostname + ":8800");
+        var that = this;
+        ws.onopen = function(e) {
+            ws.send(JSON.stringify(obj));
+        };
+        ws.onmessage = function (e) {
+            if( callback !== undefined ) {
+                callback(JSON.parse(e.data));
+            }
+        };
     }
 };
 

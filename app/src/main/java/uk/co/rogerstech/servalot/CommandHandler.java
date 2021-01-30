@@ -134,7 +134,10 @@ public class CommandHandler {
         }
 
         public void respond() {
-            if( response_node != null ) response_node.onMessage(obj_response);
+            if( response_node != null ) {
+                response_node.onMessage(obj_response);
+                response_node.close();
+            }
         }
     }
 

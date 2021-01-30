@@ -71,7 +71,7 @@ Experimental.prototype.createCmdGUI = function() {
     btn_get.onclick=function() {
         var url = 'https://github.com/andrew-rogers/andrew-rogers.github.io/raw/master/Servalot/Packages/HTTPDemo.zip';
         var filename = 'thing.zip';
-        servalot.command({cmd: "httpget", url: url, filename: filename});
+        that.servalot.command({cmd: "httpget", url: url, filename: filename});
     };
 
     // Handle click event

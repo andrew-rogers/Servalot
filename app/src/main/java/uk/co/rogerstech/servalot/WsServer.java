@@ -116,9 +116,6 @@ public class WsServer extends WebSocketServer {
             cmd = obj.getString("cmd");
             if( cmd != null ) {
                 WsNode node = nodes.get(ws);
-                if( obj.has("src") ) {
-                    node.setDst(obj.getString("src"));
-                }
                 node.onMessage(obj);
             }
         }

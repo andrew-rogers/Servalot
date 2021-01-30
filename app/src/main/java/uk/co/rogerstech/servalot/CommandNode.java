@@ -34,6 +34,11 @@ public class CommandNode extends Node {
 	}
 
     public void close() {
+        if( peer != null ) {
+            Node p = peer;
+            peer = null;
+            p.close();
+        }
         NodeList.getInstance().remove(id);
     }
 }

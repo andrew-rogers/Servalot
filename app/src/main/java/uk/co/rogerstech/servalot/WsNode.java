@@ -26,28 +26,18 @@ import org.json.JSONObject;
 
 public class WsNode extends Node {
 
-	private String dst = null;
 	private WebSocket websocket = null;
 
     WsNode(WebSocket ws) {
         websocket = ws;
     }
 
-	public void setDst(String dst) {
-		this.dst = dst;
-	}
-
 	public void send(JSONObject obj){
-		try {
-			if( dst != null ) obj.put("dst",dst);
-		}
-		catch(JSONException e) {
-            // TODO
-        }
-        websocket.send(obj.toString());
+		websocket.send(obj.toString());
 	}
 
     public void close() {
+        websocket.close();
 		NodeList.getInstance().remove(id);
 	}
 }
