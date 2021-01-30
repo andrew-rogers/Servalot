@@ -31,10 +31,19 @@ abstract class Node {
     protected OutputStream ostream = null;
     protected JSONObject description = null;
     protected StreamConnection connection = null;
+    protected Node peer = null;
 
     public Node() {
 		id = NodeList.getInstance().registerNode(this);
 		Logger.getInstance().info("New node id=" + id);
+	}
+
+	public void setPeer(Node p) {
+	    peer = p;
+	}
+
+	public void onMessage(JSONObject obj) {
+	    if( peer != null ) peer.send(obj);
 	}
 
     public JSONObject getDescription() { return description; }
@@ -42,7 +51,9 @@ abstract class Node {
     public OutputStream getOutputStream() { return ostream; }
     public StreamConnection getConnection() { return connection; }
     public void setConnection(StreamConnection c) { connection = c; }
-    public void send(JSONObject obj){};
+    public void send(JSONObject obj){
+        // TODO: Delimit for streaming
+    };
     abstract public void close();
 }
 

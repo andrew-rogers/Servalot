@@ -52,12 +52,14 @@ public class WsServer extends WebSocketServer {
     private Logger logger = null;
     private WsHttpHandler httpHandler = null;
     private HashMap<WebSocket, WsNode> nodes;
+    private NodeFactory peer_factory = null;
 
-	public WsServer( int port ) throws UnknownHostException {
+	public WsServer( NodeFactory pf, int port ) throws UnknownHostException {
         super( new InetSocketAddress( port ), new ArrayList<Draft>(Arrays.asList(new Draft_6455(), new Draft_HTTPD())) );
         logger = Logger.getInstance();
         setReuseAddr(true);
         nodes = new HashMap<WebSocket, WsNode>();
+        peer_factory = pf;
 	}
 
 	@Override
@@ -77,7 +79,17 @@ public class WsServer extends WebSocketServer {
         if( h.getFieldValue("Upgrade").equals("websocket") ) {
             logger.info("WS open ");
             ws.send("Hello!");
-            nodes.put(ws, new WsNode(ws));
+
+            // Create the local WebSocket node
+            WsNode local = new WsNode(ws);
+            nodes.put(ws, local);
+
+            // Create the peer node
+            Node peer = peer_factory.createNode();
+
+            // Tie them together
+            peer.setPeer(local);
+            local.setPeer(peer);
         }
         else {
             // Send the HTML and close
@@ -107,7 +119,7 @@ public class WsServer extends WebSocketServer {
                 if( obj.has("cb_num") ) {
                     node.setCBNum(obj.getString("cb_num"));
                 }
-                CommandHandler.getInstance().command(obj, node);
+                node.onMessage(obj);
             }
         }
         catch(JSONException e) {

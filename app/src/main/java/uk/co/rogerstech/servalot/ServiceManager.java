@@ -73,7 +73,7 @@ public class ServiceManager {
 
         // Example WebSocket server
         try {
-            WsServer s = new WsServer( 8800 );
+            WsServer s = new WsServer( new CommandNodeFactory(CommandHandler.getInstance()), 8800 );
             s.setHttpHandler(new WsServer.DemoHandler( root_dir ));
             s.start();
         }

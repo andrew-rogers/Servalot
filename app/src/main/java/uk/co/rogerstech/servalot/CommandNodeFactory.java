@@ -19,36 +19,29 @@
 
 package uk.co.rogerstech.servalot;
 
-import org.java_websocket.WebSocket;
+import java.io.File;
+import java.util.List;
+import java.util.Vector;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+public class CommandNodeFactory implements NodeFactory {
 
-public class WsNode extends Node {
+    private CommandHandler command_handler = null;
 
-	private String cb_num = null;
-	private WebSocket websocket = null;
-
-    WsNode(WebSocket ws) {
-        websocket = ws;
+    CommandNodeFactory(CommandHandler handler) {
+        command_handler = handler;
     }
 
-	public void setCBNum(String cbnum) {
-		cb_num=cbnum;
-	}
+    @Override
+    public Node createNode() {
+        Node ret = new CommandNode(command_handler);
+        return ret;
+    }
 
-	public void send(JSONObject obj){
-		try {
-			if( cb_num != null ) obj.put("cb_num",cb_num);
-		}
-		catch(JSONException e) {
-            // TODO
+    public static class Builder implements NodeFactory.Builder {
+
+        public CommandNodeFactory build(final List<String> conf) {
+            return new CommandNodeFactory(CommandHandler.getInstance());
         }
-        websocket.send(obj.toString());
-	}
-
-    public void close() {
-		NodeList.getInstance().remove(id);
-	}
+    }
 }
 

@@ -156,7 +156,7 @@ public class CommandHandler {
 
         public void respond() {
             if( response_listener != null ) response_listener.sendResponse(obj_response);
-            if( response_node != null ) response_node.send(obj_response);
+            if( response_node != null ) response_node.onMessage(obj_response);
         }
     }
 
