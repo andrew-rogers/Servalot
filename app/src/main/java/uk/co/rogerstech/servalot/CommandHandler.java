@@ -30,34 +30,26 @@ import org.json.JSONObject;
 
 public class CommandHandler {
 
-    private static CommandHandler instance = null;
     private HashMap<String, Command> commands = null;
     private Logger logger = null;
 
-    CommandHandler() {
+    // Private constructor prevents instantiation.
+	private CommandHandler() {
         commands = new HashMap<String, Command>();
         logger = Logger.getInstance();
     }
 
-    static CommandHandler getInstance() {
-        if (instance==null) instance = new CommandHandler();
-        return instance;
-    }
+    // Using the Bill Pugh Singleton pattern.
+	private static class BillPughInner {
+		private static CommandHandler instance = new CommandHandler();
+	}
+
+	public static CommandHandler getInstance() {
+		return BillPughInner.instance;
+	}
 
     public void registerCommand(Command command) {
         commands.put(command.getName(), command);
-    }
-
-    public void command(final JSONObject obj, ResponseListener l) {
-        try {
-            String str_cmd = obj.getString("cmd");
-            Command cmd = commands.get(str_cmd);
-            if (cmd!=null) cmd.execute(obj, l);
-            else logger.error("Unknown command: "+str_cmd);
-        }
-        catch(JSONException e) {
-            // TODO
-        }
     }
 
     public void command(final JSONObject obj, Node node) {
@@ -75,25 +67,12 @@ public class CommandHandler {
     static class CommandArgs {
         private JSONObject obj_cmd = null;
         private JSONObject obj_response = null;
-        private ResponseListener response_listener = null;
         private Node response_node = null;
 
         CommandArgs(final JSONObject cmd, Node node) {
             obj_cmd = cmd;
             response_node = node;
             obj_response=new JSONObject();
-        }
-
-        CommandArgs(final JSONObject cmd, ResponseListener l) {
-            obj_cmd = cmd;
-            response_listener = l;
-            obj_response=new JSONObject();
-            try {
-                obj_response.put("cb_num",cmd.getString("cb_num"));
-            }
-            catch(JSONException e) {
-                // TODO
-            }
         }
 
         public String getString(final String key) {
@@ -155,7 +134,6 @@ public class CommandHandler {
         }
 
         public void respond() {
-            if( response_listener != null ) response_listener.sendResponse(obj_response);
             if( response_node != null ) response_node.onMessage(obj_response);
         }
     }
@@ -176,10 +154,6 @@ public class CommandHandler {
         public void execute(final JSONObject cmd, Node node) {
             onExecute(new CommandHandler.CommandArgs(cmd, node));
         }
-
-        public void execute(final JSONObject cmd, ResponseListener l) {
-            onExecute(new CommandHandler.CommandArgs(cmd, l));
-        }
     }
 
     abstract static class ResponseListener {
@@ -189,6 +163,5 @@ public class CommandHandler {
             onResponse(obj);
         }
     }
-
 }
 

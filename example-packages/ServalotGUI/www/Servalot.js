@@ -51,7 +51,8 @@ Servalot.prototype.command = function(obj, callback) {
 
         // Store the callback
         this.pending[n] = callback;
-        obj.cb_num = ""+n;
+        obj.src = ""+n;
+        obj.dst = "0"; // Command server
     }
 
     if (typeof wvi !== 'undefined') {
@@ -64,7 +65,7 @@ Servalot.prototype.command = function(obj, callback) {
 };
 
 Servalot.prototype.response = function(obj) {
-    let n=obj.cb_num;
+    let n=obj.dst;
     if( n !== undefined ) {
         let cb=this.pending[n];
         if( cb !== undefined ) cb(obj);

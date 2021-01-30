@@ -26,6 +26,7 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.util.HashMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,15 +36,17 @@ public class WebViewHelper{
     private Activity activity= null;
     private WebView webView = null;
     private Logger logger = null;
-    private WebViewCommandResponseListener crl = null;
     private boolean wvReady = false;
+    private HashMap<Integer, WebViewServer> servers;
 
-    WebViewHelper(Activity activity){
+    WebViewHelper( NodeFactory pf, int port, Activity activity ){
         this.activity = activity;
         webView = new WebView(activity);
         activity.setContentView(webView);
         logger = Logger.getInstance();
         CommandHandler.getInstance().registerCommand(new CommandReady());
+        servers = new HashMap<Integer, WebViewServer>();
+        servers.put( port, new WebViewServer( pf, port ) );
         initWebView();
     }
 
@@ -61,7 +64,6 @@ public class WebViewHelper{
         else {
             webView.loadUrl("file:///android_asset/" + index_html);
         }
-        crl = new WebViewCommandResponseListener();
     }
 
     public WebView getWebView() {
@@ -95,12 +97,6 @@ public class WebViewHelper{
         }
     }
 
-    public class WebViewCommandResponseListener extends CommandHandler.ResponseListener {
-        public void onResponse(final JSONObject obj) {
-            sendToWebView(obj.toString());
-        }
-    }
-
     public class WebViewInterface {
 
         @JavascriptInterface
@@ -108,7 +104,13 @@ public class WebViewHelper{
             if( cmd.charAt(0) == '{' ) {
                 try {
                     JSONObject obj = new JSONObject(cmd);
-                    CommandHandler.getInstance().command(obj, crl);
+                    Integer dst = new Integer(0);
+                    if( obj.has("dst") ) dst = new Integer(obj.getString("dst"));
+
+                    if( servers.containsKey(dst) ) {
+                        WebViewServer s = servers.get(dst);
+                        s.onMessage(obj);
+                    }
                 }
                 catch(JSONException e) {
 		            // TODO
@@ -118,6 +120,75 @@ public class WebViewHelper{
             }
         }
 
+    }
+
+    public class WebViewServer {
+        private int port = 0;
+        private HashMap<Integer, WebViewNode> nodes = null;
+        private NodeFactory peer_factory = null;
+
+        public WebViewServer( NodeFactory pf, int p ) {
+            peer_factory = pf;
+            port = p;
+            nodes = new HashMap<Integer, WebViewNode>();
+        }
+
+        public void onOpen(Integer src) {
+
+            // If it is already open then close it
+            if( nodes.containsKey(src) ) {
+                nodes.get(src).close();
+                nodes.remove(src);
+            }
+
+            // Create the local WebView node
+            WebViewNode local = new WebViewNode( this, src );
+            nodes.put(src, local);
+
+            // Create the peer node
+            Node peer = peer_factory.createNode();
+
+            // Tie them together
+            peer.setPeer(local);
+            local.setPeer(peer);
+        }
+
+        public void onMessage(JSONObject obj) {
+            try {
+                Integer src = new Integer(0);
+                if( obj.has("src") ) {
+                    src = new Integer(obj.getString("src"));
+                }
+                if( nodes.containsKey(src) == false ) onOpen(src);
+
+                // Look-up node and call its message handler.
+                if( nodes.containsKey(src) ) {
+                    nodes.get(src).onMessage(obj);
+                }
+            }
+            catch(JSONException e) {
+		        // TODO
+            }
+        }
+
+        public void onClose(Integer src) {
+            if( nodes.containsKey(src) ) {
+	            nodes.get(src).close();
+	            nodes.remove(src);
+	        }
+	    }
+
+	    public void send(WebViewNode node, JSONObject obj) {
+	        Integer src = node.getPort();
+	        try {
+	            obj.put("src", port);
+	            obj.put( "dst", src.toString() );
+	            sendToWebView(obj.toString());
+	        }
+	        catch(JSONException e) {
+		        // TODO
+            }
+	    }
     }
 }
 

@@ -40,9 +40,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        webViewHelper = new WebViewHelper(this);
-
         logger = Logger.getInstance();
+
+        webViewHelper = new WebViewHelper( new CommandNodeFactory(CommandHandler.getInstance()), 0, this);
 
         packageManager = new PackageManager(getFilesDir());
 
@@ -53,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
         rfcomm.enableBluetooth(BT_ON);
 
         CommandHandler.getInstance().registerCommand(new CommandInstall());
-
     }
 
     @Override

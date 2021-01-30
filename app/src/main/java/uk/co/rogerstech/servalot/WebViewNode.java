@@ -19,32 +19,24 @@
 
 package uk.co.rogerstech.servalot;
 
-import org.java_websocket.WebSocket;
-
-import org.json.JSONException;
 import org.json.JSONObject;
 
-public class WsNode extends Node {
+public class WebViewNode extends Node {
 
-	private String dst = null;
-	private WebSocket websocket = null;
+	private int port = 0;
+	private WebViewHelper.WebViewServer server = null;
 
-    WsNode(WebSocket ws) {
-        websocket = ws;
+    WebViewNode(WebViewHelper.WebViewServer s, Integer p) {
+        server = s;
+        port = p;
     }
 
-	public void setDst(String dst) {
-		this.dst = dst;
-	}
+    public Integer getPort() {
+        return port;
+    }
 
 	public void send(JSONObject obj){
-		try {
-			if( dst != null ) obj.put("dst",dst);
-		}
-		catch(JSONException e) {
-            // TODO
-        }
-        websocket.send(obj.toString());
+		server.send( this, obj );
 	}
 
     public void close() {
