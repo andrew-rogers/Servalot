@@ -178,7 +178,7 @@ public class WebViewHelper{
 
                 // Look-up node and call its message handler.
                 if( nodes.containsKey(src) ) {
-                    nodes.get(src).onMessage(obj);
+                    nodes.get(src).onMessage(obj.getJSONObject("data"));
                 }
             }
             catch(JSONException e) {
@@ -187,16 +187,18 @@ public class WebViewHelper{
         }
 
         public void onClose(Integer src) {
-            JSONObject obj = new JSONObject();
+            JSONObject tcp = new JSONObject();
             try {
-                obj.put("tcf","f");
+                tcp.put( "tcf", "f" );
+                tcp.put( "src", ""+port );
+                tcp.put( "dst", src.toString() );
             }
             catch(JSONException e) {
 		        // TODO
             }
             if( nodes.containsKey(src) ) {
                 WebViewNode node = nodes.get(src);
-                send( node, obj );
+                sendToWebView(tcp.toString());
 	            node.close();
 	            nodes.remove(src);
 	        }
@@ -205,9 +207,13 @@ public class WebViewHelper{
 	    public void send(WebViewNode node, JSONObject obj) {
 	        Integer src = node.getPort();
 	        try {
-	            obj.put( "src", ""+port);
-	            obj.put( "dst", src.toString() );
-	            sendToWebView(obj.toString());
+
+	            // Create tansport control packet
+	            JSONObject tcp = new JSONObject();
+	            tcp.put( "src", ""+port);
+	            tcp.put( "dst", src.toString() );
+	            tcp.put( "data", obj);
+	            sendToWebView(tcp.toString());
 	        }
 	        catch(JSONException e) {
 		        // TODO

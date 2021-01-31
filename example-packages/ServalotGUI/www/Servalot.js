@@ -29,51 +29,63 @@ var Servalot = function() {
     this.pending = {};
     if (typeof wvi !== 'undefined') {
         var that = this;
-        wvi.response = function(json) { if(log)log("R:"+json); that.response(JSON.parse(json)); };
+        wvi.response = function(json) { if(log)log("R:"+json); that.wv_response(JSON.parse(json)); };
     }
 };
 
 Servalot.prototype.command = function(obj, callback) {
-
     if (typeof wvi !== 'undefined') {
-        if( callback !== undefined ) {
-            // Find smallest number not already pending
-            let n = 0;
-            while( this.pending[n] !== undefined ) n=n+1;
-
-            // Store the callback
-            this.pending[n] = callback;
-            obj.src = ""+n;
-            obj.dst = "0"; // Command server
-        }
-        wvi.command(JSON.stringify(obj));
+        this.wv_command( obj, callback );
     }
     else
     {
-        var hostname = window.location.hostname;
-        var ws = new WebSocket("ws://" + hostname + ":8800");
-        var that = this;
-        ws.onopen = function(e) {
-            ws.send(JSON.stringify(obj));
-        };
-        ws.onmessage = function (e) {
-            if( callback !== undefined ) {
-                callback(JSON.parse(e.data));
-            }
-        };
+        this.ws_command( obj, callback );
     }
 };
 
-Servalot.prototype.response = function(obj) {
-    let n=obj.dst;
-    if( n !== undefined ) {
-        var tcf = obj.tcf;
+Servalot.prototype.ws_command = function(obj, callback) {
+    var hostname = window.location.hostname;
+    var ws = new WebSocket("ws://" + hostname + ":8800");
+    var that = this;
+    ws.onopen = function(e) {
+        ws.send(JSON.stringify(obj));
+    };
+    ws.onmessage = function (e) {
+        if( callback !== undefined ) {
+            callback(JSON.parse(e.data));
+        }
+    };
+};
+
+Servalot.prototype.wv_command = function(obj, callback) {
+
+    if( callback === undefined ) callback = function(){};
+
+    // Find smallest number not already pending and use for source port
+    let src = 0;
+    while( this.pending[src] !== undefined ) src=src+1;
+
+    // Store the callback
+    this.pending[src] = callback;
+
+    // Create a transport control packet
+    tcp = {src: ""+src, dst: "0", data: obj}; // Use dst=0 for Servalot command server
+
+    wvi.command(JSON.stringify(tcp));
+};
+
+Servalot.prototype.wv_response = function(tcp) {
+    let dst=tcp.dst;
+    if( dst !== undefined ) {
+
+        // Check for the FIN flag
+        var tcf = tcp.tcf;
         if( tcf !== undefined && tcf.includes("f") ) {
-            delete this.pending[n];
+            delete this.pending[dst];
         }
         else {
-            var cb=this.pending[n];
-            if( cb !== undefined ) cb(obj);
+            var cb=this.pending[dst];
+            if( cb !== undefined ) cb(tcp.data);
         }
     }
 };

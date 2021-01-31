@@ -26,6 +26,7 @@ var ta = document.getElementById("ta_log");
 var ta_cmd = document.getElementById("ta_cmd");
 ta.style.width="100%";
 ta_cmd.style.width="80%";
+ta_cmd.value = "ls -l";
 
 function log(str) {
     ta.value = ta.value + str + "\n";
