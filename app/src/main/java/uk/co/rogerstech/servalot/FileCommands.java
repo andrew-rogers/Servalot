@@ -44,14 +44,32 @@ public class FileCommands {
     private HashMap<String, NodeFactory.Builder> builders;
     private HashMap<String, Vector<String> > servers;
     private Logger logger = null;
-    private File root_dir;
+    private File root_dir = null;
+    private String native_dir= null;
 
-    FileCommands(File root_dir){
+    // Private constructor prevents instantiation.
+	private FileCommands(){
         this.logger = Logger.getInstance();
-        this.root_dir=root_dir;
         CommandHandler.getInstance().registerCommand(new CommandExec());
         CommandHandler.getInstance().registerCommand(new CommandHttpGet());
     }
+
+    // Using the Bill Pugh Singleton pattern.
+	private static class BillPughInner {
+		private static FileCommands instance = new FileCommands();
+	}
+
+	public static FileCommands getInstance() {
+		return BillPughInner.instance;
+	}
+
+	public void setRootDir(File root_dir) {
+	    this.root_dir = root_dir;
+	}
+
+	public void setNativeDir(String dir) {
+	    native_dir = dir;
+	}
 
     static String readString(File file) throws FileNotFoundException, IOException {
         String ret="";
@@ -65,18 +83,32 @@ public class FileCommands {
         return ret;
     }
 
-    // Returns base64 encoded stdout as a String.
-    public String exec(List<String> cmd, String b64_stdin) {
-        StringBuffer output = new StringBuffer();
+    public Process startExec(List<String> cmd) {
+        Process process = null;
         try {
-            // Execute the command.
+            // Setup environment for process.
             ProcessBuilder processBuilder = new ProcessBuilder(cmd);
             Map<String, String> env = processBuilder.environment();
             String path=env.get("PATH");
             path=root_dir.getPath()+"/bin:"+path;
             env.put("PATH", path);
+            if (native_dir != null) env.put("BIN_DIR", native_dir);
             processBuilder.directory(root_dir);
-            Process process = processBuilder.start();
+
+            // Start process.
+            process = processBuilder.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return process;
+    }
+
+    // Returns base64 encoded stdout as a String.
+    public String exec(List<String> cmd, String b64_stdin) {
+        StringBuffer output = new StringBuffer();
+        try {
+            // Execute the command.
+            Process process = startExec(cmd);
 
             // Write the stdin.
             if( b64_stdin != null) {
@@ -118,15 +150,18 @@ public class FileCommands {
         final String url = args.getString("url");
         final String filename = args.getString("filename");
         try {
-            URL u = new URL(url);
 
+            // See if file is writable first before downloading.
+            FileOutputStream fos = new FileOutputStream(new File(root_dir, filename));
+
+            URL u = new URL(url);
             URLConnection c = u.openConnection();
             c.connect();
             int len = c.getContentLength();
 
             InputStream is = u.openStream();
             DataInputStream dis = new DataInputStream(new BufferedInputStream(is));
-            FileOutputStream fos = new FileOutputStream(new File(root_dir, filename));
+
             byte[] buf = new byte[4096];
             int cnt;
             int done=0;

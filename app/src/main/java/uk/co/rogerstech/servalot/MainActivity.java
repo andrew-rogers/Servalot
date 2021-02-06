@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         logger = Logger.getInstance();
+        logger.info("NLD: "+getApplicationInfo().nativeLibraryDir);
 
         webViewHelper = new WebViewHelper( new CommandNodeFactory(CommandHandler.getInstance()), 0, this);
 
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         rfcomm.enableBluetooth(BT_ON);
 
         CommandHandler.getInstance().registerCommand(new CommandInstall());
+        FileCommands.getInstance().setNativeDir(getApplicationInfo().nativeLibraryDir);
     }
 
     @Override

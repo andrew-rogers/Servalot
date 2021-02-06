@@ -11,5 +11,9 @@
 example-packages/AndrewWIDE/AndrewWIDE.zip
 example-packages/ArchOnAndroid/ArchOnAndroid.zip
 example-packages/BusyboxHTTPD/BusyboxHTTPD.zip
-app/src/main/java/uk/co/rogerstech/servalot/*.class
+example-packages/ServalotGUI/ServalotGUI.zip
+app/src/main/jniLibs
+alpine/packages
+alpine/root
+alpine/llvm.tgz
 

@@ -44,7 +44,7 @@ public class BackgroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("LocalService", "Received start id " + startId + ": " + intent);
 
-        new FileCommands(getFilesDir());
+        FileCommands.getInstance().setRootDir(getFilesDir());
 
         // Start service manager
         serviceManager = new ServiceManager(getFilesDir(), new File(getFilesDir(),"services.tsv"));

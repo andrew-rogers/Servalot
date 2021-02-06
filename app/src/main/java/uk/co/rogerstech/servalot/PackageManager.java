@@ -108,13 +108,7 @@ public class PackageManager {
         StringBuffer output = new StringBuffer();
         try {
             // Execute the command.
-            ProcessBuilder processBuilder = new ProcessBuilder(cmd);
-            Map<String, String> env = processBuilder.environment();
-            String path=env.get("PATH");
-            path=root.getPath()+"/bin:"+path;
-            env.put("PATH", path);
-            processBuilder.directory(root);
-            Process process = processBuilder.start();
+            Process process = FileCommands.getInstance().startExec(cmd);
 
             // Read stdout.
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));

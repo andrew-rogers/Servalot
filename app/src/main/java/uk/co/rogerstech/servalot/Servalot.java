@@ -35,7 +35,7 @@ public class Servalot {
 
         System.out.println("Files Directory: "+filesDir.getAbsolutePath());
 
-        new FileCommands(filesDir);
+        FileCommands.getInstance().setRootDir(filesDir);
 
         // Start service manager
         ServiceManager serviceManager = new ServiceManager(filesDir, new File(filesDir,"services.tsv"));
