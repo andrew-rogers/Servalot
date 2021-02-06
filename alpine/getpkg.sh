@@ -116,6 +116,7 @@ pkg_add libffi
 pkg_add xz-libs
 pkg_add zlib
 pkg_add musl-dev
+pkg_add llvm10
 
 move_exec
 move_so
