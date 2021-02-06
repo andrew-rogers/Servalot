@@ -117,6 +117,8 @@ pkg_add xz-libs
 pkg_add zlib
 pkg_add musl-dev
 pkg_add llvm10
+pkg_add binutils
+pkg_add make
 
 move_exec
 move_so
@@ -124,5 +126,6 @@ move_so
 cp "$ALPINE_DIR/mklinks.sh" "$ROOT_DIR/mklinks.sh"
 cp "$ALPINE_DIR/test_clang.sh" "$ROOT_DIR/test_clang.sh"
 cp "$ALPINE_DIR/hello.c" "$ROOT_DIR/hello.c"
+cp "$ALPINE_DIR/exec_sh.sh" "$JNI_DIR/exec_sh.so"
 make_tgz
 
