@@ -41,6 +41,11 @@ Experimental.prototype.createCmdGUI = function() {
     btn_get.innerHTML = "Get";
     this.div_main.appendChild(btn_get);
 
+    // Create an Export WildBox button
+    var btn_wildbox = document.createElement("button");
+    btn_wildbox.innerHTML = "Export WildBox";
+    this.div_main.appendChild(btn_wildbox);
+
     // Create a Logs button
     var btn_logs = document.createElement("button");
     btn_logs.innerHTML = "Logs";
@@ -72,9 +77,21 @@ Experimental.prototype.createCmdGUI = function() {
     btn_get.onclick=function() {
         //var url = 'https://github.com/andrew-rogers/andrew-rogers.github.io/raw/master/Servalot/Packages/HTTPDemo.zip';
         var url = 'http://uk.alpinelinux.org/alpine/v3.13/main/aarch64/clang-libs-10.0.1-r0.apk';
-        var filename = 'thing.zip';
+        var filename = 'clang-libs-10.0.1-r0.apk';
         that.servalot.command({cmd: "httpget", url: url, filename: filename}, function(obj) {
             ta_output.value = ta_output.value + JSON.stringify(obj) + "\n";
+        });
+    };
+
+    // Handle Export WildBox button click
+    var that = this;
+    btn_wildbox.onclick=function() {
+        var script = 'LD="$SERVALOT_LIBS/ld-musl-aarch64.so"\n'
+            + 'BB="$SERVALOT_LIBS/busybox.so"\n'
+            + 'sed "s|export SERVALOT_LIBS=|export SERVALOT_LIBS=$SERVALOT_LIBS|" utils/wildbox-setup.sh > /sdcard/Servalot/wildbox-setup.sh\n';
+        that.servalot.command({cmd: "exec", args: ["sh", "-s", ], stdin: btoa(script)}, function(obj) {
+            var str=atob(obj.stdout);
+            ta_output.value = ta_output.value + str + "\n";
         });
     };
 

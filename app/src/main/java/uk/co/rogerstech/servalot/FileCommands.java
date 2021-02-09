@@ -92,8 +92,11 @@ public class FileCommands {
             String path=env.get("PATH");
             path=root_dir.getPath()+"/bin:"+path;
             env.put("PATH", path);
-            if (native_dir != null) env.put("BIN_DIR", native_dir);
-            processBuilder.directory(root_dir);
+            if (native_dir != null) env.put("SERVALOT_LIBS", native_dir);
+            if (root_dir != null) {
+                env.put("FILES_DIR", root_dir.toString());
+                processBuilder.directory(root_dir);
+            }
 
             // Start process.
             process = processBuilder.start();
