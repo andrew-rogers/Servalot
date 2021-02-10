@@ -119,6 +119,7 @@ pkg_add musl-dev
 pkg_add llvm10
 pkg_add binutils
 pkg_add make
+pkg_add dropbear
 
 move_exec
 move_so
@@ -127,5 +128,7 @@ cp "$ALPINE_DIR/mklinks.sh" "$ROOT_DIR/mklinks.sh"
 cp "$ALPINE_DIR/test_clang.sh" "$ROOT_DIR/test_clang.sh"
 cp "$ALPINE_DIR/hello.c" "$ROOT_DIR/hello.c"
 cp "$ALPINE_DIR/exec_sh.sh" "$JNI_DIR/exec_sh.so"
+cp "$ALPINE_DIR/wildbox" "$JNI_DIR/wildbox.so"
+
 make_tgz
 

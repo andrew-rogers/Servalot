@@ -15,13 +15,13 @@ $ alpine/getpkg.sh
 This will download a collection of Alpine Linux packages and expand them. The ELF executables and shared objects are moved to the JNI directory to be included in the Servalot APK. Other files are archived up into a file called *llvm.tgz* which is to be copied onto the device. Suggest /sdcard/Servalot/Download/llvm.tgz which can then be expanded into the Servalot files directory using the command
 
 ```
-"$BIN_DIR/ld-musl-aarch64.so" "$BIN_DIR/busybox.so" tar -zxvf /sdcard/Servalot/Download/llvm.tgz 2>&1
+"$SERVALOT_LIBS/ld-musl-aarch64.so" "$SERVALOT_LIBS/busybox.so" tar -zxvf /sdcard/Servalot/Download/llvm.tgz 2>&1
 ```
 
 Links to the executables and shared objects are then created by running
 
 ```
-"$BIN_DIR/ld-musl-aarch64.so" "$BIN_DIR/busybox.so" sh mklinks.sh 2>&1
+"$SERVALOT_LIBS/ld-musl-aarch64.so" "$SERVALOT_LIBS/busybox.so" sh mklinks.sh 2>&1
 ```
 
 Compile and execute a simple program
@@ -37,7 +37,7 @@ Using Servalot Binaries from Terminal Apps
 It is possible to execute Servalot binaries from Terminal Apps. This will be demonstrated using [ConnectBot](https://connectbot.org/). The name of the Servalot directory used to store the binaries is needed and this can be written to a file on the (emulated) sdcard using the following command in Servalot GUI
 
 ```
-echo "SERVALOT_BIN=$BIN_DIR" > /sdcard/Servalot/env.sh 2>&1
+echo "export SERVALOT_LIBS=$SERVALOT_LIBS" > /sdcard/Servalot/env.sh 2>&1
 ```
 
 Setup a local session in ConnectBot and cd to its files directory
@@ -55,7 +55,7 @@ $ . /sdcard/Servalot/env.sh
 Now the Alpine Linux busybox included in Servalot can be run from the ConnectBot session
 
 ```
-$ $SERVALOT_BIN/ld-musl-aarch64.so $SERVALOT_BIN/busybox.so
+$ $SERVALOT_LIBS/ld-musl-aarch64.so $SERVALOT_LIBS/busybox.so
 ```
 
 Which should display the busybox version and supported functions.

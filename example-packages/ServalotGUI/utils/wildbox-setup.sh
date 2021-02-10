@@ -17,16 +17,14 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-
 export SERVALOT_LIBS=
-
-LD="$SERVALOT_LIBS/ld-musl-aarch64.so"
-BB="$SERVALOT_LIBS/busybox.so"
-WB="$SERVALOT_LIBS/wildbox.so"
 
 wildbox() {
 
     local cmd="$1"
+    local LD="$SERVALOT_LIBS/ld-musl-aarch64.so"
+    local BB="$SERVALOT_LIBS/busybox.so"
+    local WB="$SERVALOT_LIBS/wildbox.so"
     shift
     
     case "$cmd" in
@@ -37,9 +35,10 @@ wildbox() {
             if [ -w "$here" ]; then
                 # We can write to the current dir so install here.
                 echo "$here";
+            elif [ -w "/data/data/org.connectbot/files" ]; then
+                echo "/data/data/org.connectbot/files"
             else
-                # Find the directory of the terminal app.
-                echo "/data/data/$(cat /proc/$PPID/cmdline)/files"
+                echo ""
             fi
         ;;
         
@@ -48,10 +47,16 @@ wildbox() {
         ;;
         
         "mklinks" )
-            "$LD" "$BB" ln -s "$WB" "$FILES_DIR/bin/ls"
+            wildbox mkdir "$FILES_DIR/bin"
+            "$LD" "$BB" ln -s "$WB" "$FILES_DIR/bin/ln"
+            "$LD" "$BB" ln -s "$WB" "$FILES_DIR/bin/ifconfig"
            
 
     esac
+}
+
+cdf() {
+    cd "$FILES_DIR/$1"
 }
 
 # If running setup in Servalot then FILES_DIR will already be set to a
@@ -62,19 +67,21 @@ if [ ! -w "$FILES_DIR" ]; then
     wildbox mkdir "$FILES_DIR"
 fi
 
-export FILES_DIR
-export PATH="$FILES_DIR/bin:$PATH"
-export WILDBOX_HELPER="$FILES_DIR/wildbox-helper.sh"
+if [ -w "$FILES_DIR" ]; then
+    export FILES_DIR
+    export PATH="$FILES_DIR/bin:$PATH"
+    export WILDBOX_HELPER="$FILES_DIR/wildbox-helper.sh"
 
-# Install wildbox helper if not already installed
-if [ ! -e "$WILDBOX_HELPER" ]; then
-    cat /sdcard/Servalot/wilbox-helper.sh > "$WILDBOX_HELPER"
+    # Install wildbox helper if not already installed
+    if [ ! -e "$WILDBOX_HELPER" ]; then
+        cat /sdcard/Servalot/wildbox-helper.sh > "$WILDBOX_HELPER"
+    fi
+
+    # Setup links if not already done
+    if [ ! -e "$FILES_DIR/bin/ln" ]; then
+        wildbox mklinks
+    fi
+else
+    echo "Could not create a writeable directory for WildBox links." >&2
 fi
-
-# Setup links if not already done
-if [ ! -e "$FILES_DIR/bin/ls" ]; then
-    wildbox mklinks
-fi
-
-
 
