@@ -123,6 +123,7 @@ move_exec
 move_so
 
 cp "$WILDBOX_DIR/wildbox" "$JNI_DIR/wildbox.so"
+cp "$WILDBOX_DIR/mklinks.sh" "$ROOT_DIR/mklinks.sh"
 
 make_tgz
 
