@@ -13,9 +13,6 @@ example-packages/ArchOnAndroid/ArchOnAndroid.zip
 example-packages/BusyboxHTTPD/BusyboxHTTPD.zip
 example-packages/ServalotGUI/ServalotGUI.zip
 app/src/main/jniLibs
-alpine/packages
-alpine/root
-alpine/llvm.tgz
 wildbox/alpine-packages
 wildbox/alpine-root
 wildbox/wildbox.tgz

@@ -47,15 +47,39 @@ wildbox() {
             "$LD" "$BB" mkdir -p "$1"
         ;;
 
+        "expand_fs" )
+            ( cd "$FILES_DIR" && "$LD" "$BB" tar -zxvf "/sdcard/Servalot/Download/wildbox.tgz" )
+        ;;
+
         "mklink" )
             "$LD" "$BB" rm -f "$FILES_DIR/$1"
             "$LD" "$BB" ln -s "$WB" "$FILES_DIR/$1"
+        ;;
+
+        "mksolink" )
+            local so=$(echo "$1" | sed 's|.*/||' | sed 's|[.]so.*|.so|')
+            "$LD" "$BB" rm -f "$FILES_DIR/$1"
+            "$LD" "$BB" ln -s "$SERVALOT_LIBS/$so" "$FILES_DIR/$1"
         ;;
 
         "mklinks" )
             wildbox mkdir "$FILES_DIR/bin"
             wildbox mklink "bin/ln"
             wildbox mklink "bin/ifconfig"
+
+            # TODO: BusyBox applet links
+
+            if [ -f "$FILES_DIR/EXEC_FILES" ]; then
+                while read line; do
+                    wildbox mklink "$line"
+                done <"$FILES_DIR/EXEC_FILES"
+            fi
+
+            if [ -f "$FILES_DIR/SO_FILES" ]; then
+                while read line; do
+                    wildbox mksolink "$line"
+                done <"$FILES_DIR/SO_FILES"
+            fi
 
     esac
 }
@@ -77,9 +101,9 @@ if [ -w "$FILES_DIR" ]; then
     export PATH="$FILES_DIR/bin:$PATH"
     export WILDBOX_HELPER="$FILES_DIR/wildbox-helper.sh"
 
-    # Install wildbox helper if not already installed
+    # Install wildbox filesystem if not already installed
     if [ ! -e "$WILDBOX_HELPER" ]; then
-        cat /sdcard/Servalot/wildbox-helper.sh > "$WILDBOX_HELPER"
+        wildbox expand_fs
     fi
 
     # Setup links if not already done
