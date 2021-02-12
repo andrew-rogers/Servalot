@@ -26,9 +26,9 @@ wildbox() {
     local BB="$SERVALOT_LIBS/busybox.so"
     local WB="$SERVALOT_LIBS/wildbox.so"
     shift
-    
+
     case "$cmd" in
-    
+
         "get_writeable_dir" )
             # If current directory is child of an existing Servalot directory then get Servalot parent directory.
             local here=${PWD%%/Servalot*}
@@ -41,16 +41,20 @@ wildbox() {
                 echo ""
             fi
         ;;
-        
+
         "mkdir" )
             "$LD" "$BB" mkdir -p "$1"
         ;;
-        
+
+        "mklink" )
+            "$LD" "$BB" rm -f "$FILES_DIR/$1"
+            "$LD" "$BB" ln -s "$WB" "$FILES_DIR/$1"
+        ;;
+
         "mklinks" )
             wildbox mkdir "$FILES_DIR/bin"
-            "$LD" "$BB" ln -s "$WB" "$FILES_DIR/bin/ln"
-            "$LD" "$BB" ln -s "$WB" "$FILES_DIR/bin/ifconfig"
-           
+            wildbox mklink "bin/ln"
+            wildbox mklink "bin/ifconfig"
 
     esac
 }
