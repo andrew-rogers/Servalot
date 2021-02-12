@@ -88,7 +88,7 @@ Experimental.prototype.createCmdGUI = function() {
     btn_wildbox.onclick=function() {
         var script = 'LD="$SERVALOT_LIBS/ld-musl-aarch64.so"\n'
             + 'BB="$SERVALOT_LIBS/busybox.so"\n'
-            + '"$LD" "$BB" sed "s|export SERVALOT_LIBS=|export SERVALOT_LIBS=$SERVALOT_LIBS|" utils/wildbox-setup.sh > /sdcard/Servalot/wildbox-setup.sh\n'
+            + '"$LD" "$BB" sed "s|# export SERVALOT_LIBS|export SERVALOT_LIBS=$SERVALOT_LIBS|" utils/wildbox-setup.sh > /sdcard/Servalot/wildbox-setup.sh\n'
             + '"$LD" "$BB" cp utils/wildbox-helper.sh /sdcard/Servalot/\n';
         that.servalot.command({cmd: "exec", args: ["sh", "-s", ], stdin: btoa(script)}, function(obj) {
             var str=atob(obj.stdout);

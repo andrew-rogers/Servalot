@@ -17,7 +17,8 @@
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-export SERVALOT_LIBS=
+# The line below is modified by 'Export WildBox' button for use in terminal apps such as ConnectBot.
+# export SERVALOT_LIBS
 
 wildbox() {
 

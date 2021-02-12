@@ -9,13 +9,13 @@ Including LLVM Support
 Before building and installing the APK, to include LLVM support, run the following on the build host PC
 
 ```
-$ alpine/getpkg.sh
+$ wildbox/get-alpine-pkgs.sh llvm
 ```
 
-This will download a collection of Alpine Linux packages and expand them. The ELF executables and shared objects are moved to the JNI directory to be included in the Servalot APK. Other files are archived up into a file called *llvm.tgz* which is to be copied onto the device. Suggest /sdcard/Servalot/Download/llvm.tgz which can then be expanded into the Servalot files directory using the command
+This will download a collection of Alpine Linux packages and expand them. The ELF executables and shared objects are moved to the JNI directory to be included in the Servalot APK. Other files are archived up into a file called *wildbox.tgz* which is to be copied onto the device. Suggest /sdcard/Servalot/Download/wildbox.tgz which can then be expanded into the Servalot files directory using the command
 
 ```
-"$SERVALOT_LIBS/ld-musl-aarch64.so" "$SERVALOT_LIBS/busybox.so" tar -zxvf /sdcard/Servalot/Download/llvm.tgz 2>&1
+"$SERVALOT_LIBS/ld-musl-aarch64.so" "$SERVALOT_LIBS/busybox.so" tar -zxvf /sdcard/Servalot/Download/wildbox.tgz 2>&1
 ```
 
 Links to the executables and shared objects are then created by running

@@ -16,4 +16,7 @@ app/src/main/jniLibs
 alpine/packages
 alpine/root
 alpine/llvm.tgz
+wildbox/alpine-packages
+wildbox/alpine-root
+wildbox/wildbox.tgz
 

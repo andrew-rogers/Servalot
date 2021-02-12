@@ -2,7 +2,17 @@
 
 # TODO: Search PATH for sh script $name.sh and run with busybox.so sh
 # TODO: Search PATH for LLVM bitcode $name.bc and run with LLVM lli
-# TODO: Eventually Servalot will be split into multiple APKS, search SERVALOT_PATH $name.so
 
-# otherwise, assume a busybox applet
-"$LD" "$BB" $*
+
+# Remove directory prefix. See Parameter Expansion section in bash man page.
+name="${1##*/}"
+shift
+
+# TODO: Eventually Servalot will be split into multiple APKS, search SERVALOT_PATH $name.so
+if [ -x "$SERVALOT_LIBS/$name.so" ]; then
+    "$LD" "$SERVALOT_LIBS/$name.so" $*
+else
+    # otherwise, assume a busybox applet
+    "$LD" "$BB" "$name" $*
+fi
+

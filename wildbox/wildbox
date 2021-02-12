@@ -16,11 +16,8 @@ if [ -f "$WILDBOX_HELPER" ]; then
     
     export LD_LIBRARY_PATH="$FILES_DIR/lib:$FILES_DIR/usr/lib"
 
-    # Remove directory prefix. See Parameter Expansion section in bash man page.
-    name="${0##*/}"
-
     # Run the helper with busybox
-    "$LD" "$BB" sh "$WILDBOX_HELPER" "$name" $*
+    "$LD" "$BB" sh "$WILDBOX_HELPER" "$0" $*
 else
     echo "Can't find WildBox helper." >&2
 fi
