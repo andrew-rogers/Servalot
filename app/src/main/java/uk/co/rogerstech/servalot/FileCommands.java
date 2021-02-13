@@ -90,7 +90,7 @@ public class FileCommands {
             ProcessBuilder processBuilder = new ProcessBuilder(cmd);
             Map<String, String> env = processBuilder.environment();
             String path=env.get("PATH");
-            path=root_dir.getPath()+"/bin:"+path;
+            path=root_dir.getPath()+"/usr/bin:"+root_dir.getPath()+"/bin:"+path;
             env.put("PATH", path);
             if (native_dir != null) env.put("SERVALOT_LIBS", native_dir);
             if (root_dir != null) {

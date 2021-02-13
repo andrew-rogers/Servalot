@@ -98,7 +98,7 @@ fi
 
 if [ -w "$FILES_DIR" ]; then
     export FILES_DIR
-    export PATH="$FILES_DIR/bin:$PATH"
+    export PATH="$FILES_DIR/usr/bin:$FILES_DIR/bin:$PATH"
     export WILDBOX_HELPER="$FILES_DIR/wildbox-helper.sh"
 
     # Install wildbox filesystem if not already installed
