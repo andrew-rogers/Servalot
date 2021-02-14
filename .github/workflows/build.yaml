@@ -10,6 +10,11 @@ jobs:
         run: $ANDROID_SDK_ROOT/ndk-bundle/build/core/toolchains/aarch64-linux-android-clang -static wildbox/wildbox.c -o wildbox/wildbox
       - name: Build the app
         run: ./gradlew assembleDebug
+      - name: Upload WildBox
+        uses: actions/upload-artifact@v1
+        with:
+          name: wildbox
+          path: wildbox/wildbox
       - name: Upload APK
         uses: actions/upload-artifact@v1
         with:
