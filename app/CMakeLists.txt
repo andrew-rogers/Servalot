@@ -4,3 +4,7 @@ add_executable(
     src/main/c/wildbox.c
 )
 
+target_link_libraries(
+    wildbox.so
+    PRIVATE "-static"
+)

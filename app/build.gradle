@@ -19,7 +19,6 @@ android {
     externalNativeBuild {
         cmake {
           path "CMakeLists.txt"
-          ldFlags '-static'
         }
 
     }
