@@ -7,7 +7,7 @@ jobs:
       - name: Checkout the code
         uses: actions/checkout@v2
       - name: Env
-        run: find $ANDROID_SDK_ROOT/ndk-bundle | grep clang
+        run: find "$ANDROID_SDK_ROOT/ndk-bundle/" | grep clang
       - name: Build WildBox
         run: $ANDROID_SDK_ROOT/ndk-bundle/build/core/toolchains/aarch64-linux-android-clang -static wildbox/wildbox.c -o wildbox/wildbox
       - name: Build the app
