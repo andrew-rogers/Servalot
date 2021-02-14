@@ -4,8 +4,3 @@ add_executable(
     src/main/c/wildbox.c
 )
 
-target_link_options(
-    wildbox.so
-    PRIVATE "-static"
-)
-
