@@ -6,10 +6,15 @@ jobs:
     steps:
       - name: Checkout the code
         uses: actions/checkout@v2
-      - name: Install Ninja
-        run: sudo apt-get install -y ninja-build
+      - name: Build WildBox
+        run: $ANDROID_SDK_ROOT/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android27-clang -static -fPIE -fPIC wildbox/wildbox.c -o wildbox/wildbox
       - name: Build the app
         run: ./gradlew assembleDebug
+      - name: Upload WildBox
+        uses: actions/upload-artifact@v1
+        with:
+          name: wildbox
+          path: wildbox/wildbox
       - name: Upload APK
         uses: actions/upload-artifact@v1
         with:
