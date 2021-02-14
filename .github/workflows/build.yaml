@@ -6,6 +6,8 @@ jobs:
     steps:
       - name: Checkout the code
         uses: actions/checkout@v2
+      - name: Dump env
+        run: env
       - name: Build the app
         run: ./gradlew assembleDebug
       - name: Upload APK
