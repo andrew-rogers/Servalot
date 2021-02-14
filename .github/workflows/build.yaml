@@ -6,6 +6,8 @@ jobs:
     steps:
       - name: Checkout the code
         uses: actions/checkout@v2
+      - name: Install Ninja
+        run: sudo apt-get install -y ninja-build
       - name: Build the app
         run: ./gradlew assembleDebug
       - name: Upload APK
