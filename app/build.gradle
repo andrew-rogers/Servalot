@@ -17,9 +17,9 @@ android {
         }
     }
     externalNativeBuild {
-        ndk.ldFlags += '-static'
         cmake {
           path "CMakeLists.txt"
+          ldFlags += '-static'
         }
 
     }
