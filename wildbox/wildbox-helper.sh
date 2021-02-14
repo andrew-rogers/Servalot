@@ -6,7 +6,7 @@
 
 # Remove directory prefix. See Parameter Expansion section in bash man page.
 name="${1##*/}"
-name1="$1"
+name1=$("$LD" "$BB" which "$1")
 shift
 
 # Follow any symbolic link chain to get applet name
