@@ -7,7 +7,7 @@ jobs:
       - name: Checkout the code
         uses: actions/checkout@v2
       - name: Build WildBox
-        run: "$ANDROID_SDK_ROOT/ndk-bundle/build/core/toolchains/aarch64-linux-android-clang" -static wildbox/wildbox.c -o wildbox/wildbox
+        run: $ANDROID_SDK_ROOT/ndk-bundle/build/core/toolchains/aarch64-linux-android-clang -static wildbox/wildbox.c -o wildbox/wildbox
       - name: Build the app
         run: ./gradlew assembleDebug
       - name: Upload APK
