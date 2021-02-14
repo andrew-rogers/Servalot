@@ -8,6 +8,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Dump env
         run: env
+        run: find "$ANDROID_SDK_ROOT/ndk-bundle/" | grep clang
       - name: Build the app
         run: ./gradlew assembleDebug
       - name: Upload APK
